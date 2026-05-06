@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TransportPro — La plateforme des chauffeurs indépendants</title>
+<meta name="description" content="Trouvez des sociétés de transport, calculez vos revenus et simulez vos charges. L'outil indispensable du chauffeur indépendant en France et Belgique."/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --navy:#0B1628;--navy-mid:#152238;--navy-light:#1E3352;
+  --blue:#1A56FF;--blue-glow:rgba(26,86,255,.22);
+  --amber:#F5A623;--amber-lt:#FFC857;
+  --white:#FFFFFF;--off-white:#F4F6FB;
+  --gray-100:#EDF0F7;--gray-200:#D1D8E8;--gray-400:#8896B3;--gray-600:#4A5775;
+  --green:#10B981;--red:#EF4444;
+  --font-h:'Syne',sans-serif;--font-b:'DM Sans',sans-serif;
+  --r:12px;--r-lg:18px;--r-xl:26px;--t:.2s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-b);background:var(--navy);color:var(--white);line-height:1.6;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+button,select,input,textarea{font-family:inherit;cursor:pointer}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--navy)}
+::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:3px}
+.page{display:none}.page.active{display:block}
+.bg-fixed{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(26,86,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(26,86,255,.04) 1px,transparent 1px);background-size:56px 56px}
+.bg-orb1{position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(26,86,255,.25) 0%,transparent 70%);top:-200px;right:-150px;border-radius:50%;filter:blur(70px);animation:drift 16s ease-in-out infinite alternate}
+.bg-orb2{position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(245,166,35,.12) 0%,transparent 70%);bottom:0;left:-100px;border-radius:50%;filter:blur(80px);animation:drift 20s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate(30px,-20px) scale(1.08)}}
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;display:flex;align-items:center;padding:0 32px;background:rgba(11,22,40,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.07)}
+.nav-inner{max-width:1200px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--font-h);font-size:1.15rem;font-weight:800;cursor:pointer}
+.nav-logo-icon{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.nav-logo strong{color:var(--blue)}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-link{padding:7px 14px;border-radius:var(--r);font-size:.85rem;color:rgba(255,255,255,.6);transition:var(--t);border:none;background:none}
+.nav-link:hover{color:var(--white);background:rgba(255,255,255,.07)}
+.nav-cta{padding:8px 20px;background:var(--blue);color:var(--white);border:none;border-radius:var(--r);font-family:var(--font-h);font-size:.85rem;font-weight:700;transition:var(--t)}
+.nav-cta:hover{background:#0d44e0;transform:translateY(-1px)}
+.nav-burger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:6px}
+.nav-burger span{display:block;width:22px;height:2px;background:var(--white);border-radius:2px}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.grad-text{background:linear-gradient(120deg,var(--blue) 0%,var(--amber) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-tag{display:inline-block;font-family:var(--font-h);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);background:rgba(26,86,255,.1);border:1px solid rgba(26,86,255,.2);border-radius:999px;padding:4px 14px;margin-bottom:14px}
+.section-title{font-family:var(--font-h);font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:800;line-height:1.15;margin-bottom:10px}
+.section-sub{font-size:1rem;color:rgba(255,255,255,.55);max-width:520px}
+.section-header{text-align:center;margin-bottom:56px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:var(--r);font-family:var(--font-h);font-size:.9rem;font-weight:700;border:none;transition:var(--t);cursor:pointer;white-space:nowrap}
+.btn-primary{background:var(--blue);color:var(--white)}
+.btn-primary:hover{background:#0d44e0;transform:translateY(-2px);box-shadow:0 8px 28px var(--blue-glow)}
+.btn-outline{background:transparent;color:var(--white);border:1.5px solid rgba(255,255,255,.2)}
+.btn-outline:hover{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.06)}
+.btn-amber{background:var(--amber);color:var(--navy)}
+.btn-amber:hover{background:var(--amber-lt);transform:translateY(-2px)}
+.btn-lg{padding:16px 36px;font-size:1rem;border-radius:var(--r-lg)}
+.btn-full{width:100%;justify-content:center}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+/* HERO */
+#page-landing{padding-top:64px}
+.hero{min-height:calc(100vh - 64px);display:flex;align-items:center;position:relative;overflow:hidden}
+.hero-inner{position:relative;z-index:2;max-width:780px;padding:80px 0}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:6px 18px;margin-bottom:28px;animation:fadeUp .7s .1s both}
+.hero h1{font-family:var(--font-h);font-size:clamp(2.5rem,6vw,4.4rem);font-weight:900;line-height:1.05;letter-spacing:-.03em;margin-bottom:20px;animation:fadeUp .7s .2s both}
+.hero-sub{font-size:1.1rem;color:rgba(255,255,255,.6);max-width:560px;line-height:1.7;margin-bottom:36px;animation:fadeUp .7s .3s both}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;animation:fadeUp .7s .4s both;margin-bottom:48px}
+.hero-proof{display:flex;align-items:center;gap:20px;animation:fadeUp .7s .5s both;flex-wrap:wrap}
+.proof-item{display:flex;align-items:center;gap:8px;font-size:.85rem;color:rgba(255,255,255,.5)}
+.proof-dot{width:6px;height:6px;background:var(--green);border-radius:50%}
+
+/* TOOLS */
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:60px 0 80px;position:relative;z-index:2}
+.tool-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-xl);padding:28px;cursor:pointer;transition:var(--t);position:relative;overflow:hidden}
+.tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--amber));opacity:0;transition:var(--t)}
+.tool-card:hover{transform:translateY(-6px);border-color:rgba(26,86,255,.3);box-shadow:0 16px 48px rgba(26,86,255,.15)}
+.tool-card:hover::before{opacity:1}
+.tool-icon{width:52px;height:52px;border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:18px}
+.tool-icon-blue{background:rgba(26,86,255,.15)}
+.tool-icon-amber{background:rgba(245,166,35,.15)}
+.tool-icon-green{background:rgba(16,185,129,.15)}
+.tool-card h3{font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.tool-card p{font-size:.88rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:18px}
+.tool-tag{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 12px;border-radius:999px}
+.tool-tag-starter{background:rgba(26,86,255,.1);color:var(--blue);border:1px solid rgba(26,86,255,.2)}
+.tool-tag-pro{background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.2)}
+.tool-tag-entreprise{background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
+
+/* HOW */
+.how{padding:80px 0;background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.how-step{text-align:center;padding:32px 24px}
+.how-num{font-family:var(--font-h);font-size:.7rem;font-weight:800;letter-spacing:.14em;color:var(--blue);background:rgba(26,86,255,.1);border-radius:999px;padding:4px 12px;display:inline-block;margin-bottom:16px}
+.how-icon{font-size:2.2rem;margin-bottom:14px}
+.how-step h3{font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.how-step p{font-size:.88rem;color:rgba(255,255,255,.5);line-height:1.6}
+
+/* PRICING */
+.pricing{padding:80px 0}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:960px;margin:0 auto}
+.price-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-xl);padding:32px;position:relative;transition:var(--t)}
+.price-card:hover{transform:translateY(-4px)}
+.price-card-pro{background:linear-gradient(135deg,rgba(26,86,255,.12) 0%,rgba(26,86,255,.06) 100%);border-color:rgba(26,86,255,.35);box-shadow:0 0 60px rgba(26,86,255,.1)}
+.price-card-entreprise{background:linear-gradient(135deg,rgba(245,166,35,.08) 0%,rgba(245,166,35,.03) 100%);border-color:rgba(245,166,35,.25)}
+.price-popular{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--blue);color:var(--white);font-family:var(--font-h);font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:4px 16px;border-radius:999px;white-space:nowrap}
+.price-name{font-family:var(--font-h);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:12px}
+.price-amount{font-family:var(--font-h);font-size:3rem;font-weight:900;line-height:1;margin-bottom:4px}
+.price-amount span{font-size:1.2rem;color:rgba(255,255,255,.5);font-weight:400}
+.price-period{font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:24px}
+.price-features{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.price-feat{display:flex;align-items:center;gap:10px;font-size:.88rem;color:rgba(255,255,255,.7)}
+.price-feat-icon{color:var(--green);font-size:.9rem;flex-shrink:0}
+.price-feat-no{color:rgba(255,255,255,.25)}
+.price-feat-no .price-feat-icon{color:rgba(255,255,255,.2)}
+
+/* TESTIMONIALS */
+.testimonials{padding:80px 0;background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.06)}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.testi-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-xl);padding:24px}
+.testi-stars{color:var(--amber);font-size:.9rem;margin-bottom:12px}
+.testi-text{font-size:.9rem;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:16px;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-avatar{width:36px;height:36px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;flex-shrink:0}
+.testi-name{font-size:.85rem;font-weight:600}
+.testi-role{font-size:.75rem;color:rgba(255,255,255,.4)}
+
+/* CTA BAND */
+.cta-band{padding:80px 0;position:relative;overflow:hidden}
+.cta-band-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,86,255,.15) 0%,rgba(245,166,35,.08) 100%);border-top:1px solid rgba(26,86,255,.2);border-bottom:1px solid rgba(26,86,255,.2)}
+.cta-band-inner{position:relative;z-index:1;text-align:center}
+.cta-band h2{font-family:var(--font-h);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:900;margin-bottom:12px}
+.cta-band p{color:rgba(255,255,255,.6);margin-bottom:32px;font-size:1rem}
+
+/* FOOTER */
+.footer{padding:48px 0 32px;border-top:1px solid rgba(255,255,255,.07)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;margin-bottom:40px}
+.footer-brand p{font-size:.85rem;color:rgba(255,255,255,.4);line-height:1.7;margin-top:14px;max-width:260px}
+.footer-col h4{font-family:var(--font-h);font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px}
+.footer-col ul{display:flex;flex-direction:column;gap:8px}
+.footer-col a{font-size:.85rem;color:rgba(255,255,255,.5);transition:var(--t)}
+.footer-col a:hover{color:var(--white)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:20px;display:flex;justify-content:space-between;font-size:.78rem;color:rgba(255,255,255,.25);flex-wrap:wrap;gap:8px}
+
+/* TOOL PAGES */
+.tool-page{padding-top:64px;min-height:100vh}
+.tool-breadcrumb{display:flex;align-items:center;gap:8px;font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:16px;padding-top:32px}
+.tool-breadcrumb button{background:none;border:none;color:rgba(255,255,255,.4);font-size:.82rem;transition:var(--t);padding:0}
+.tool-breadcrumb button:hover{color:var(--white)}
+.tool-breadcrumb span{color:rgba(255,255,255,.2)}
+.tool-page-title{font-family:var(--font-h);font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-bottom:6px}
+.tool-page-sub{font-size:.92rem;color:rgba(255,255,255,.5);margin-bottom:28px}
+
+/* TRANSPORT FINDER */
+.search-bar{display:flex;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-xl);padding:10px;backdrop-filter:blur(12px);flex-wrap:wrap;margin-bottom:8px}
+.search-bar:focus-within{border-color:rgba(26,86,255,.5);box-shadow:0 0 0 4px rgba(26,86,255,.1)}
+.search-field{display:flex;align-items:center;gap:8px;flex:1;min-width:160px;background:rgba(255,255,255,.07);border-radius:var(--r);padding:0 14px}
+.search-field input,.search-field select{flex:1;background:none;border:none;color:var(--white);font-size:.92rem;padding:12px 0;outline:none;min-width:0}
+.search-field input::placeholder{color:rgba(255,255,255,.35)}
+.search-field select{appearance:none}
+.search-field select option{background:var(--navy-mid)}
+.btn-geo{display:flex;align-items:center;gap:6px;background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);font-size:.82rem;padding:7px 14px;border-radius:var(--r);transition:var(--t);cursor:pointer}
+.btn-geo:hover{border-color:rgba(255,255,255,.35);color:var(--white)}
+.tf-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;padding:12px 18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg)}
+.tf-count{font-family:var(--font-h);font-size:.95rem;font-weight:700}
+.tf-count span{color:var(--blue)}
+.tf-loc{font-size:.8rem;color:rgba(255,255,255,.4);margin-top:2px}
+.sort-sel{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:var(--white);border-radius:var(--r);padding:7px 12px;font-size:.82rem;outline:none}
+.sort-sel option{background:var(--navy-mid)}
+.tf-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.tf-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);padding:20px;cursor:pointer;transition:var(--t);position:relative;overflow:hidden;animation:cardIn .4s both}
+.tf-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--amber));opacity:0;transition:var(--t)}
+.tf-card:hover{border-color:rgba(26,86,255,.35);transform:translateY(-3px);box-shadow:0 12px 40px rgba(26,86,255,.15)}
+.tf-card:hover::before{opacity:1}
+.tf-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.tf-avatar{width:42px;height:42px;border-radius:var(--r);background:rgba(26,86,255,.12);display:flex;align-items:center;justify-content:center;font-size:1.2rem;overflow:hidden;flex-shrink:0}
+.tf-avatar img{width:100%;height:100%;object-fit:cover}
+.tf-badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;font-size:.7rem;font-weight:700}
+.tf-badge-open{background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.2)}
+.tf-badge-closed{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.tf-name{font-family:var(--font-h);font-size:.93rem;font-weight:700;margin-bottom:4px;line-height:1.3}
+.tf-addr{font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:11px;line-height:1.4}
+.tf-stats{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:11px}
+.tf-stars{color:var(--amber);font-size:.8rem}
+.tf-rating{font-size:.83rem;font-weight:700;margin-left:3px}
+.tf-rcount{font-size:.7rem;color:rgba(255,255,255,.3)}
+.tf-dist{font-size:.78rem;color:rgba(100,160,255,.9);font-weight:600;background:rgba(26,86,255,.1);padding:2px 9px;border-radius:999px}
+.tf-actions{display:flex;gap:6px}
+.tf-btn{flex:1;padding:7px 10px;border-radius:var(--r);font-size:.76rem;font-weight:700;border:none;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:3px;cursor:pointer}
+.tf-btn-call{background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.2)}
+.tf-btn-call:hover{background:rgba(16,185,129,.22)}
+.tf-btn-detail{background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.1)}
+.tf-btn-detail:hover{background:rgba(255,255,255,.12)}
+.tf-empty{text-align:center;padding:60px 20px;color:rgba(255,255,255,.4);grid-column:1/-1}
+.tf-empty-icon{font-size:2.5rem;margin-bottom:12px}
+.tf-empty h3{font-family:var(--font-h);font-size:1.1rem;color:rgba(255,255,255,.7);margin-bottom:6px}
+.tf-loading{text-align:center;padding:70px 20px;grid-column:1/-1}
+.spinner{width:36px;height:36px;border:3px solid rgba(26,86,255,.2);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* Limite recherches */
+.limit-banner{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:var(--r-lg);padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.limit-banner p{font-size:.9rem;color:var(--amber)}
+.limit-banner strong{color:var(--white)}
+
+/* ROZ */
+.roz-wrap{max-width:1100px;margin:0 auto;padding:0 0 60px}
+.roz-tabs{display:flex;justify-content:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.roz-tab{padding:.65rem 2rem;border-radius:999px;cursor:pointer;font-size:.95rem;font-weight:700;border:2px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);background:transparent;transition:all .2s;font-family:inherit}
+.roz-tab:hover{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7)}
+.roz-tab-be.active{background:#EF4444;border-color:#EF4444;color:#fff}
+.roz-tab-fr.active{background:#1a3c6e;border-color:#2d6fd4;color:#fff}
+.roz-infobox{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-left:3px solid var(--amber);border-radius:var(--r);padding:1rem 1.3rem;margin-bottom:2rem;font-size:.88rem;line-height:1.7;color:rgba(255,255,255,.7)}
+.roz-infobox strong{color:var(--amber)}
+.roz-flag{font-size:.72rem;background:rgba(255,255,255,.1);border-radius:4px;padding:2px 6px;margin-right:5px;color:var(--amber);font-weight:800}
+.roz-grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.roz-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);padding:1.5rem}
+.roz-card-title{font-size:.7rem;font-weight:800;letter-spacing:.13em;color:rgba(255,255,255,.4);margin-bottom:1.4rem;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.roz-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.roz-dot-red{background:#EF4444}.roz-dot-amber{background:var(--amber)}.roz-dot-blue{background:#2d6fd4}.roz-dot-green{background:var(--green)}
+.roz-field{margin-bottom:1.1rem}.roz-field:last-child{margin-bottom:0}
+.roz-field label{display:block;font-size:.87rem;color:rgba(255,255,255,.5);margin-bottom:.4rem}
+.roz-input-wrap{position:relative}
+.roz-input-wrap input{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:var(--r);padding:.72rem 4.5rem .72rem .95rem;color:var(--amber);font-size:1.05rem;font-weight:700;outline:none;transition:border-color .15s;font-family:inherit;-moz-appearance:textfield}
+.roz-input-wrap input::-webkit-outer-spin-button,.roz-input-wrap input::-webkit-inner-spin-button{-webkit-appearance:none}
+.roz-input-wrap input:focus{border-color:#EF4444}
+.roz-input-wrap .roz-unit{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);font-size:.82rem;pointer-events:none;white-space:nowrap}
+.roz-hint{font-size:.74rem;color:rgba(255,255,255,.2);margin-top:.35rem;font-style:italic}
+.roz-results{background:rgba(16,185,129,.08);border:2px solid var(--green);border-radius:var(--r-lg);padding:1.5rem;margin-top:1.2rem}
+.roz-results-header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem}
+.roz-net-label{font-size:.95rem;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:8px}
+.roz-net-label::before{content:'';display:inline-block;width:10px;height:10px;background:var(--amber);border-radius:50%}
+.roz-net-big{font-size:clamp(2.8rem,6vw,4rem);font-weight:900;color:var(--green);line-height:1}
+.roz-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem}
+.roz-mini{background:rgba(255,255,255,.05);border-radius:var(--r);padding:.9rem 1rem}
+.roz-mini-label{font-size:.76rem;color:rgba(255,255,255,.3);margin-bottom:.35rem}
+.roz-mini-val{font-size:1.1rem;font-weight:800}
+.v-red{color:#EF4444}.v-green{color:var(--green)}.v-white{color:var(--white)}
+.roz-waterfall{border-top:1px solid rgba(255,255,255,.1);padding-top:1rem;margin-top:.5rem}
+.roz-wf-row{display:flex;justify-content:space-between;font-size:.9rem;padding:5px 0;color:rgba(255,255,255,.6)}
+.roz-wf-total{font-weight:900;color:var(--white);border-top:1px solid rgba(255,255,255,.15);padding-top:10px;margin-top:6px;font-size:1rem}
+.roz-wf-val{font-weight:700}
+.roz-seuil{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);padding:1.5rem;margin-top:1.2rem}
+.roz-seuil-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem}
+.roz-seuil-item{background:rgba(255,255,255,.06);border-radius:var(--r);padding:.9rem 1rem}
+.roz-seuil-label{font-size:.76rem;color:rgba(255,255,255,.3);margin-bottom:.35rem}
+.roz-seuil-val{font-size:1.05rem;font-weight:800;color:var(--amber)}
+.roz-prog-labels{display:flex;justify-content:space-between;font-size:.74rem;color:rgba(255,255,255,.3);margin-bottom:.4rem}
+.roz-prog-bg{background:rgba(255,255,255,.1);border-radius:999px;height:10px;overflow:hidden}
+.roz-prog-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#EF4444 0%,var(--amber) 50%,var(--green) 100%);transition:width .4s ease;min-width:2px}
+.roz-rentable{font-size:.9rem;font-weight:800;margin-top:.7rem;min-height:1.3em}
+.roz-ok{color:var(--green)}.roz-ko{color:#EF4444}
+
+/* SAL */
+.sal-wrap{max-width:960px;margin:0 auto;padding:0 0 60px}
+.sal-tabs{display:flex;gap:8px;margin-bottom:1rem}
+.sal-tab{padding:8px 24px;border-radius:var(--r);border:1px solid rgba(255,255,255,.2);background:transparent;cursor:pointer;font-size:14px;font-weight:500;color:rgba(255,255,255,.5);transition:all .15s;font-family:inherit}
+.sal-tab:hover{background:rgba(255,255,255,.07)}
+.sal-tab-fr.active{background:rgba(12,68,124,.5);color:#85b7eb;border-color:#85b7eb}
+.sal-tab-be.active{background:rgba(58,34,6,.5);color:#fac775;border-color:#fac775}
+.sal-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);padding:1rem 1.25rem;margin-bottom:1rem}
+.sal-row{display:flex;gap:12px;flex-wrap:wrap}
+.sal-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px}
+.sal-field label{font-size:13px;color:rgba(255,255,255,.5)}
+.sal-field select,.sal-field input{width:100%;padding:8px 10px;border-radius:var(--r);border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:var(--white);font-size:14px;font-family:inherit;outline:none}
+.sal-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1rem}
+.sal-metric{background:rgba(255,255,255,.06);border-radius:var(--r);padding:.85rem 1rem}
+.sal-metric-label{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:4px}
+.sal-metric-value{font-size:20px;font-weight:500}
+.sal-metric-sub{font-size:11px;color:rgba(255,255,255,.25);margin-top:3px}
+.sal-cols{display:flex;gap:12px;flex-wrap:wrap}
+.sal-col{flex:1;min-width:220px}
+.sal-stitle{font-size:14px;font-weight:500;margin-bottom:10px}
+.sal-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.sal-table td{padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.8);word-break:break-word}
+.sal-table td:nth-child(2){width:54px;text-align:center;color:rgba(255,255,255,.4)}
+.sal-table td:nth-child(3){width:72px;text-align:right;font-weight:500}
+.sal-table tr:last-child td{border-bottom:none}
+.sal-tot td{border-top:1px solid rgba(255,255,255,.2)!important;font-weight:500;background:rgba(255,255,255,.06)}
+.sal-infobox{border-radius:var(--r);padding:10px 14px;font-size:12px;margin-top:12px;line-height:1.6}
+.sal-info-fr{background:rgba(12,68,124,.3);color:#85b7eb;border:1px solid rgba(133,183,235,.2)}
+.sal-info-be{background:rgba(58,34,6,.3);color:#fac775;border:1px solid rgba(250,199,117,.2)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(11,22,40,.8);backdrop-filter:blur(8px);z-index:999;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:#0f1e33;border:1px solid rgba(255,255,255,.1);border-radius:var(--r-xl);width:100%;max-width:500px;max-height:90vh;overflow-y:auto;position:relative;animation:modalIn .3s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(20px)}to{opacity:1;transform:none}}
+.modal-close-btn{position:absolute;top:14px;right:14px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:none;border-radius:50%;color:rgba(255,255,255,.5);font-size:.85rem;z-index:10;cursor:pointer}
+.modal-close-btn:hover{background:rgba(255,255,255,.15);color:var(--white)}
+.modal-header{padding:24px 24px 0}
+.modal-tag{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+.modal-name{font-family:var(--font-h);font-size:1.2rem;font-weight:800;margin-bottom:16px;line-height:1.3}
+.modal-body{padding:12px 24px}
+.modal-info-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.modal-info-row:last-child{border-bottom:none}
+.modal-info-icon{font-size:.95rem;flex-shrink:0;margin-top:2px}
+.modal-info-content{display:flex;flex-direction:column;gap:2px;min-width:0}
+.modal-info-label{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.modal-info-val{font-size:.9rem;color:rgba(255,255,255,.85);word-break:break-word}
+.modal-info-link{color:#5b8aff}
+.modal-info-link:hover{text-decoration:underline}
+.modal-footer{padding:16px 24px 24px;display:flex;gap:10px;flex-wrap:wrap}
+.mbtn{flex:1;min-width:100px;padding:12px 16px;border-radius:var(--r);font-size:.88rem;font-weight:700;border:none;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.mbtn-call{background:var(--blue);color:var(--white)}
+.mbtn-call:hover{background:#0d44e0;transform:translateY(-1px)}
+.mbtn-web{background:rgba(255,255,255,.07);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.12)}
+.mbtn-gmaps{background:rgba(234,179,8,.1);color:#fbbf24;border:1px solid rgba(234,179,8,.2);font-size:.82rem}
+.mbtn-close{background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.08)}
+.toast{position:fixed;bottom:24px;right:24px;color:var(--white);padding:12px 20px;border-radius:var(--r);font-size:.88rem;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.3);transform:translateY(80px);opacity:0;transition:var(--t);z-index:1000}
+.toast.show{transform:none;opacity:1}
+
+@media(max-width:1024px){.tools-grid{grid-template-columns:1fr 1fr}.how-steps{grid-template-columns:1fr 1fr}.pricing-grid{grid-template-columns:1fr}.testi-grid{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){
+  .nav-links{display:none}.nav-burger{display:flex}
+  .tools-grid{grid-template-columns:1fr}.how-steps{grid-template-columns:1fr}
+  .testi-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+  .roz-grid2{grid-template-columns:1fr}.sal-cols{flex-direction:column}
+  .tf-cards{grid-template-columns:1fr}.search-bar{flex-direction:column}
+  .search-field{width:100%;min-width:0}.modal-footer{flex-direction:column}
+  h1{font-size:2.2rem}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-fixed"><div class="bg-grid"></div><div class="bg-orb1"></div><div class="bg-orb2"></div></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="showPage('landing')">
+      <div class="nav-logo-icon">🚛</div>
+      Transport<strong>Pro</strong>
+    </div>
+    <div class="nav-links">
+      <button class="nav-link" onclick="scrollToPricing()">Nos outils</button>
+      <button class="nav-link" onclick="scrollToPricing()">Tarifs</button>
+    </div>
+    <button class="btn btn-primary nav-cta" onclick="scrollToPricing()">Voir les offres →</button>
+    <button class="nav-burger" id="navBurger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div id="page-landing" class="page active">
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <div class="hero-badge">🇫🇷 France · 🇧🇪 Belgique · Données Google en temps réel</div>
+        <h1>L'outil indispensable du<br/><span class="grad-text">chauffeur indépendant</span></h1>
+        <p class="hero-sub">Trouvez des sociétés de transport, calculez vos revenus nets et simulez vos charges salariales. Tout en un seul endroit.</p>
+        <div class="hero-btns">
+          <button class="btn btn-primary btn-lg" onclick="scrollToPricing()">Voir les offres →</button>
+          <button class="btn btn-outline btn-lg" onclick="scrollToPricing()">Choisir mon plan</button>
+        </div>
+        <div class="hero-proof">
+          <div class="proof-item"><div class="proof-dot"></div>Données Google Places réelles</div>
+          <div class="proof-item"><div class="proof-dot"></div>France & Belgique</div>
+          <div class="proof-item"><div class="proof-dot"></div>Paiement sécurisé Stripe</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.06);padding:60px 0">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">3 outils puissants</div>
+        <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+        <p class="section-sub">Une plateforme complète pour gérer votre activité de chauffeur indépendant.</p>
+      </div>
+      <div class="tools-grid">
+        <div class="tool-card" onclick="scrollToPricing()">
+          <div class="tool-icon tool-icon-blue">🔍</div>
+          <h3>TransportFinder</h3>
+          <p>Trouvez des sociétés de transport près de vous. Données réelles Google, distances, téléphones, sites web.</p>
+          <span class="tool-tag tool-tag-starter">Starter & Pro</span>
+        </div>
+        <div class="tool-card" onclick="showPage('revenus')">
+          <div class="tool-icon tool-icon-amber">💰</div>
+          <h3>Simulateur de Revenus</h3>
+          <p>Calculez votre revenu net en tant qu'indépendant. Seuil de rentabilité, cotisations sociales FR & BE.</p>
+          <span class="tool-tag tool-tag-pro">Plan Pro uniquement</span>
+        </div>
+        <div class="tool-card" onclick="showPage('charges')">
+          <div class="tool-icon tool-icon-green">📊</div>
+          <h3>Simulateur de Charges</h3>
+          <p>Calculez les charges salariales et patronales. CDI, CDD, intérim, alternance. France & Belgique.</p>
+          <span class="tool-tag tool-tag-pro">Plan Pro uniquement</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Simple & rapide</div>
+        <h2 class="section-title">Comment ça marche ?</h2>
+      </div>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num">01</div>
+          <div class="how-icon">💳</div>
+          <h3>Choisissez votre plan</h3>
+          <p>Starter à 9€/mois pour la recherche, Pro à 29,99€/mois pour tous les outils illimités.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num">02</div>
+          <div class="how-icon">🔍</div>
+          <h3>Recherchez</h3>
+          <p>Entrez votre ville et trouvez des sociétés de transport autour de vous avec leurs coordonnées directes.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num">03</div>
+          <div class="how-icon">🤝</div>
+          <h3>Contactez & Simulez</h3>
+          <p>Appelez directement les sociétés et calculez vos revenus pour optimiser votre activité.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Tarifs transparents</div>
+        <h2 class="section-title">Choisissez votre plan</h2>
+        <p class="section-sub">Sans engagement · Paiement sécurisé Stripe · Annulez à tout moment</p>
+      </div>
+      <div class="pricing-grid">
+
+        <!-- STARTER -->
+        <div class="price-card">
+          <div class="price-name">Starter</div>
+          <div class="price-amount">9<span>€/mois</span></div>
+          <div class="price-period">Accès à la recherche de transporteurs</div>
+          <div class="price-features">
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Recherche de transporteurs</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>3 recherches par jour</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Fiche complète des entreprises</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Appel direct & site web</div>
+            <div class="price-feat price-feat-no"><span class="price-feat-icon">✗</span><span style="color:rgba(255,255,255,.25)">Simulateur de revenus</span></div>
+            <div class="price-feat price-feat-no"><span class="price-feat-icon">✗</span><span style="color:rgba(255,255,255,.25)">Simulateur de charges</span></div>
+            <div class="price-feat price-feat-no"><span class="price-feat-icon">✗</span><span style="color:rgba(255,255,255,.25)">Recherches illimitées</span></div>
+          </div>
+          <button class="btn btn-outline btn-full btn-lg" onclick="goToStripe('starter')">Commencer — 9€/mois →</button>
+        </div>
+
+        <!-- PRO -->
+        <div class="price-card price-card-pro">
+          <div class="price-popular">⭐ Le plus populaire</div>
+          <div class="price-name">Pro</div>
+          <div class="price-amount">29<span>.99€/mois</span></div>
+          <div class="price-period">Accès complet à tous les outils</div>
+          <div class="price-features">
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Recherches illimitées</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Fiche complète des entreprises</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Appel direct & site web</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>✅ Simulateur de revenus</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>✅ Simulateur de charges</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>France & Belgique</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Support prioritaire</div>
+          </div>
+          <button class="btn btn-primary btn-full btn-lg" onclick="goToStripe('pro')">Commencer — 29,99€/mois →</button>
+        </div>
+
+        <!-- ENTREPRISE -->
+        <div class="price-card price-card-entreprise">
+          <div class="price-name">Entreprise</div>
+          <div class="price-amount">79<span>€/mois</span></div>
+          <div class="price-period">Pour les sociétés de transport</div>
+          <div class="price-features">
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Profil mis en avant dans les résultats</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Badge ✅ "Vérifié" sur votre fiche</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Statistiques de visibilité</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Contact illimité des chauffeurs</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Tout le plan Pro inclus</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Support VIP dédié</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Accès aux futures fonctionnalités</div>
+          </div>
+          <button class="btn btn-amber btn-full btn-lg" onclick="goToStripe('entreprise')">Commencer — 79€/mois →</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="testimonials">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Ils nous font confiance</div>
+        <h2 class="section-title">Ce que disent nos utilisateurs</h2>
+      </div>
+      <div class="testi-grid">
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"J'ai trouvé 3 nouvelles sociétés partenaires en une semaine. Le simulateur de revenus m'a aidé à négocier mes tarifs."</p>
+          <div class="testi-author"><div class="testi-avatar">K</div><div><div class="testi-name">Karim B.</div><div class="testi-role">Chauffeur livreur · Bruxelles</div></div></div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Le simulateur de charges m'a évité des mauvaises surprises avec les cotisations. Je recommande à tous les sous-traitants."</p>
+          <div class="testi-author"><div class="testi-avatar">M</div><div><div class="testi-name">Mohamed T.</div><div class="testi-role">Sous-traitant transport · Lyon</div></div></div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Interface claire, données à jour. Je l'utilise chaque semaine pour trouver de nouvelles missions près de Paris."</p>
+          <div class="testi-author"><div class="testi-avatar">S</div><div><div class="testi-name">Sophie L.</div><div class="testi-role">Chauffeure indépendante · Paris</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="cta-band-bg"></div>
+    <div class="container cta-band-inner">
+      <h2>Prêt à développer votre activité ?</h2>
+      <p>Rejoignez les chauffeurs qui utilisent TransportPro pour trouver des missions et optimiser leurs revenus.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary btn-lg" onclick="goToStripe('pro')">Commencer Pro — 29,99€/mois →</button>
+        <button class="btn btn-outline btn-lg" onclick="goToStripe('starter')">Plan Starter — 9€/mois</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo" style="cursor:default"><div class="nav-logo-icon">🚛</div>Transport<strong>Pro</strong></div>
+          <p>La plateforme tout-en-un pour les chauffeurs indépendants en France et en Belgique.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Outils</h4>
+          <ul>
+            <li><a href="#" onclick="scrollToPricing()">TransportFinder</a></li>
+            <li><a href="#" onclick="scrollToPricing()">Simulateur revenus</a></li>
+            <li><a href="#" onclick="scrollToPricing()">Simulateur charges</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Légal</h4>
+          <ul>
+            <li><a href="#">CGU</a></li>
+            <li><a href="#">Confidentialité</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 TransportPro — Tous droits réservés</p>
+        <p>🇫🇷 France · 🇧🇪 Belgique · Paiement sécurisé 🔒 Stripe</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- TRANSPORT FINDER -->
+<div id="page-finder" class="page">
+  <div class="tool-page">
+    <div class="container">
+      <div class="tool-breadcrumb">
+        <button onclick="showPage('landing')">Accueil</button>
+        <span>›</span>
+        <span style="color:rgba(255,255,255,.7)">TransportFinder</span>
+      </div>
+      <h2 class="tool-page-title">🔍 TransportFinder</h2>
+      <p class="tool-page-sub">Trouvez des sociétés de transport autour de votre ville — données réelles Google Places</p>
+
+      <!-- Bannière limite -->
+      <div class="limit-banner" id="limitBanner" style="display:none">
+        <p>⚠️ Vous avez utilisé vos <strong>3 recherches gratuites</strong> du jour. Passez au plan Pro pour des recherches illimitées.</p>
+        <button class="btn btn-amber" onclick="goToStripe('pro')">Passer au Pro — 29,99€/mois →</button>
+      </div>
+
+      <div class="search-bar">
+        <div class="search-field">
+          <span>📍</span>
+          <input type="text" id="tfCityInput" placeholder="Ville (ex: Bruxelles, Paris, Lyon…)" autocomplete="off"/>
+        </div>
+        <div class="search-field" style="flex:0;min-width:130px">
+          <span>📏</span>
+          <select id="tfRadius">
+            <option value="5000">5 km</option>
+            <option value="10000">10 km</option>
+            <option value="25000" selected>25 km</option>
+            <option value="50000">50 km</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="tfSearchBtn">🔍 Rechercher</button>
+      </div>
+      <button class="btn-geo" id="tfGeoBtn">📡 Me géolocaliser</button>
+
+      <div id="tfResults" style="display:none;margin-top:24px">
+        <div class="tf-toolbar">
+          <div>
+            <div class="tf-count" id="tfCount">Chargement…</div>
+            <div class="tf-loc" id="tfLoc"></div>
+          </div>
+          <select class="sort-sel" id="tfSort" onchange="tfSortAndRender()">
+            <option value="distance">Distance</option>
+            <option value="rating">Note ★</option>
+            <option value="name">Nom A→Z</option>
+          </select>
+        </div>
+        <div class="tf-cards" id="tfCards"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIMULATEUR REVENUS -->
+<div id="page-revenus" class="page">
+  <div class="tool-page">
+    <div class="container">
+      <div class="tool-breadcrumb">
+        <button onclick="showPage('landing')">Accueil</button>
+        <span>›</span>
+        <span style="color:rgba(255,255,255,.7)">Simulateur de Revenus</span>
+      </div>
+      <h2 class="tool-page-title">💰 Simulateur de Revenus</h2>
+      <p class="tool-page-sub">Calculez votre revenu net en tant qu'indépendant — France & Belgique · Plan Pro</p>
+      <div class="roz-wrap">
+        <div class="roz-tabs">
+          <button class="roz-tab roz-tab-be active" id="roz-tab-be" onclick="rozSetCountry('be')">🇧🇪 Belgique</button>
+          <button class="roz-tab roz-tab-fr" id="roz-tab-fr" onclick="rozSetCountry('fr')">🇫🇷 France</button>
+        </div>
+        <div class="roz-infobox" id="roz-infobox"></div>
+        <div class="roz-grid2">
+          <div class="roz-card">
+            <div class="roz-card-title"><span class="roz-dot roz-dot-red"></span>Activité</div>
+            <div class="roz-field"><label>Tarif par livraison (€)</label><div class="roz-input-wrap"><input type="number" id="roz-tarif" value="8" min="1" max="500" step="0.5"/><span class="roz-unit">€ / livr.</span></div></div>
+            <div class="roz-field"><label>Livraisons / jour</label><div class="roz-input-wrap"><input type="number" id="roz-livj" value="25" min="1" max="200"/><span class="roz-unit">livr./jour</span></div></div>
+            <div class="roz-field"><label>Jours travaillés / mois</label><div class="roz-input-wrap"><input type="number" id="roz-jours" value="22" min="1" max="31"/><span class="roz-unit">jours</span></div></div>
+          </div>
+          <div class="roz-card">
+            <div class="roz-card-title"><span class="roz-dot roz-dot-amber"></span>Charges mensuelles</div>
+            <div class="roz-field"><label>Carburant (€/mois)</label><div class="roz-input-wrap"><input type="number" id="roz-carb" value="400" min="0"/><span class="roz-unit">€</span></div></div>
+            <div class="roz-field"><label>Assurance véhicule (€/mois)</label><div class="roz-input-wrap"><input type="number" id="roz-assur" value="120" min="0"/><span class="roz-unit">€</span></div></div>
+            <div class="roz-field"><label>Entretien / réparations (€/mois)</label><div class="roz-input-wrap"><input type="number" id="roz-entret" value="80" min="0"/><span class="roz-unit">€</span></div></div>
+            <div class="roz-field"><label>Leasing / crédit véhicule (€/mois)</label><div class="roz-input-wrap"><input type="number" id="roz-leasing" value="0" min="0"/><span class="roz-unit">€</span></div></div>
+            <div class="roz-field"><label>Autres charges (€/mois)</label><div class="roz-input-wrap"><input type="number" id="roz-autres" value="50" min="0"/><span class="roz-unit">€</span></div></div>
+          </div>
+        </div>
+        <div class="roz-card" style="margin-top:1.2rem">
+          <div class="roz-card-title"><span class="roz-dot roz-dot-blue"></span>Cotisations sociales</div>
+          <div class="roz-grid2">
+            <div class="roz-field"><label id="roz-cot-label">Taux cotisations (%)</label><div class="roz-input-wrap"><input type="number" id="roz-cotTaux" value="20.5" min="0" max="100" step="0.1"/><span class="roz-unit">%</span></div><div class="roz-hint" id="roz-cot-hint"></div></div>
+            <div class="roz-field"><label id="roz-cot2-label">Cotisation minimale / trimestre</label><div class="roz-input-wrap"><input type="number" id="roz-cotMin" value="121.14" min="0" step="0.01"/><span class="roz-unit">€</span></div><div class="roz-hint" id="roz-cot2-hint"></div></div>
+          </div>
+        </div>
+        <div class="roz-results">
+          <div class="roz-results-header">
+            <div><div class="roz-net-label">Revenu net mensuel estimé</div><div class="roz-net-big" id="roz-net-big">0 €</div></div>
+          </div>
+          <div class="roz-mini-grid">
+            <div class="roz-mini"><div class="roz-mini-label">CA Brut mensuel</div><div class="roz-mini-val v-red" id="roz-ca-brut">0 €</div></div>
+            <div class="roz-mini"><div class="roz-mini-label">Total charges</div><div class="roz-mini-val v-red" id="roz-tot-charges">0 €</div></div>
+            <div class="roz-mini"><div class="roz-mini-label">Bénéfice net</div><div class="roz-mini-val v-white" id="roz-benef-net">0 €</div></div>
+            <div class="roz-mini"><div class="roz-mini-label">Cotisations sociales</div><div class="roz-mini-val v-red" id="roz-cotis">0 €</div></div>
+            <div class="roz-mini"><div class="roz-mini-label">Revenu NET / jour</div><div class="roz-mini-val v-green" id="roz-net-jour">0 €</div></div>
+            <div class="roz-mini"><div class="roz-mini-label">Revenu NET annuel</div><div class="roz-mini-val v-green" id="roz-net-an">0 €</div></div>
+          </div>
+          <div class="roz-waterfall">
+            <div class="roz-wf-row"><span>CA Brut</span><span class="roz-wf-val v-white" id="roz-wf1">0 €</span></div>
+            <div class="roz-wf-row"><span>− Charges déductibles</span><span class="roz-wf-val v-red" id="roz-wf2">0 €</span></div>
+            <div class="roz-wf-row"><span>= Bénéfice net</span><span class="roz-wf-val v-white" id="roz-wf3">0 €</span></div>
+            <div class="roz-wf-row"><span>− Cotisations sociales</span><span class="roz-wf-val v-red" id="roz-wf4">0 €</span></div>
+            <div class="roz-wf-row roz-wf-total"><span>= REVENU NET</span><span class="roz-wf-val v-green" id="roz-wf5">0 €</span></div>
+          </div>
+        </div>
+        <div class="roz-seuil">
+          <div class="roz-card-title"><span class="roz-dot roz-dot-amber"></span>Seuil de rentabilité</div>
+          <div class="roz-seuil-grid">
+            <div class="roz-seuil-item"><div class="roz-seuil-label">CA minimum / mois</div><div class="roz-seuil-val" id="roz-s-ca">0 €</div></div>
+            <div class="roz-seuil-item"><div class="roz-seuil-label">Livraisons minimum / mois</div><div class="roz-seuil-val" id="roz-s-livmois">0 livr.</div></div>
+            <div class="roz-seuil-item"><div class="roz-seuil-label">Livraisons minimum / jour</div><div class="roz-seuil-val" id="roz-s-livjour">0 livr./jr</div></div>
+            <div class="roz-seuil-item"><div class="roz-seuil-label">Taux de charges total</div><div class="roz-seuil-val" id="roz-s-taux">0%</div></div>
+          </div>
+          <div class="roz-prog-labels"><span>Seuil</span><span>100%</span><span>CA actuel</span></div>
+          <div class="roz-prog-bg"><div class="roz-prog-fill" id="roz-prog-fill" style="width:0%"></div></div>
+          <div class="roz-rentable" id="roz-rentable"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIMULATEUR CHARGES -->
+<div id="page-charges" class="page">
+  <div class="tool-page">
+    <div class="container">
+      <div class="tool-breadcrumb">
+        <button onclick="showPage('landing')">Accueil</button>
+        <span>›</span>
+        <span style="color:rgba(255,255,255,.7)">Simulateur de Charges</span>
+      </div>
+      <h2 class="tool-page-title">📊 Simulateur de Charges Salariales</h2>
+      <p class="tool-page-sub">France & Belgique — CDI, CDD, intérim, alternance · Plan Pro</p>
+      <div class="sal-wrap">
+        <div class="sal-tabs">
+          <button class="sal-tab sal-tab-fr active" id="sal-btn-fr" onclick="salSetCountry('fr')">🇫🇷 France</button>
+          <button class="sal-tab sal-tab-be" id="sal-btn-be" onclick="salSetCountry('be')">🇧🇪 Belgique</button>
+        </div>
+        <div class="sal-card">
+          <div class="sal-row">
+            <div class="sal-field"><label>Type de contrat</label><select id="sal-contrat"><option value="cdi">CDI</option><option value="cdd">CDD</option><option value="interim">Intérim</option><option value="alternance">Alternance</option></select></div>
+            <div class="sal-field"><label>Catégorie</label><select id="sal-categorie"><option value="employe">Employé</option><option value="ouvrier">Ouvrier</option></select></div>
+            <div class="sal-field"><label>Salaire brut mensuel (€)</label><input type="number" id="sal-brut" value="2500" min="500" max="50000" step="50"/></div>
+            <div class="sal-field"><label>Temps de travail</label><select id="sal-temps"><option value="1">Temps plein (100%)</option><option value="0.8">Temps partiel 80%</option><option value="0.5">Mi-temps 50%</option></select></div>
+          </div>
+          <div id="sal-infobox" class="sal-infobox sal-info-fr"></div>
+        </div>
+        <div class="sal-metrics" id="sal-metrics"></div>
+        <div class="sal-cols">
+          <div class="sal-col sal-card"><div class="sal-stitle">Cotisations salariales</div><table class="sal-table" id="sal-tsal"></table></div>
+          <div class="sal-col sal-card"><div class="sal-stitle">Charges patronales & taxes</div><table class="sal-table" id="sal-tpat"></table></div>
+        </div>
+        <p style="text-align:center;font-size:.75rem;color:rgba(255,255,255,.2);margin-top:16px">Taux indicatifs 2024-2025. Consultez un expert-comptable pour une simulation précise.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close-btn" onclick="closeModal()">✕</button>
+    <div id="modalHeader" class="modal-header"></div>
+    <div id="modalBody" class="modal-body"></div>
+    <div id="modalFooter" class="modal-footer"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ STRIPE LINKS ══════════════════════
+const STRIPE = {
+  starter:    'https://buy.stripe.com/cNi28s7tHg5i1hS1DyeUU1h',
+  pro:        'https://buy.stripe.com/3cI3cwaFTdXa5y82HCeUU1i',
+  entreprise: 'https://buy.stripe.com/dRm28scO1bP28Kk81WeUU1j',
+};
+const GKEY = 'AIzaSyC0BBE03Ae7E-cFAVS55VGGs20NZhHzj3E';
+
+// ══ LIMITE RECHERCHES (3/jour) ════════
+const TODAY = new Date().toDateString();
+let searchCount = parseInt(localStorage.getItem('tf_count_' + TODAY) || '0');
+function incrementSearch() {
+  searchCount++;
+  localStorage.setItem('tf_count_' + TODAY, searchCount);
+  if (searchCount >= 3) document.getElementById('limitBanner').style.display = 'flex';
+}
+
+// ══ NAVIGATION ════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function scrollToPricing() {
+  showPage('landing');
+  setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior:'smooth' }), 100);
+}
+function goToStripe(plan) {
+  window.open(STRIPE[plan], '_blank');
+}
+document.getElementById('navBurger').addEventListener('click', () => {
+  const l = document.querySelector('.nav-links');
+  if (l) l.style.display = l.style.display === 'flex' ? 'none' : 'flex';
+});
+
+// ══ TRANSPORT FINDER ══════════════════
+let tfResults = [], tfLat = null, tfLng = null, tfLabel = '';
+function km(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180;const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2;return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))*10)/10;}
+
+async function tfSearch() {
+  if (searchCount >= 3) {
+    document.getElementById('limitBanner').style.display = 'flex';
+    showToast('⚠ Limite de 3 recherches atteinte ! Passez au Pro.', true);
+    return;
+  }
+  const city = document.getElementById('tfCityInput').value.trim();
+  const radius = parseInt(document.getElementById('tfRadius').value);
+  if (!city && tfLat === null) { showToast('⚠ Entrez une ville !', true); return; }
+  const res = document.getElementById('tfResults');
+  res.style.display = 'block';
+  document.getElementById('tfCards').innerHTML = `<div class="tf-loading"><div class="spinner"></div><p style="color:rgba(255,255,255,.5)">Connexion à Google Places…</p></div>`;
+  res.scrollIntoView({ behavior:'smooth', block:'start' });
+  try {
+    if (city) {
+      const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(city)}&language=fr&key=${GKEY}`);
+      const d = await r.json();
+      if (d.status !== 'OK') throw new Error(`Ville "${city}" introuvable`);
+      tfLat = d.results[0].geometry.location.lat;
+      tfLng = d.results[0].geometry.location.lng;
+      tfLabel = d.results[0].formatted_address;
+    }
+    const queries = ['société transport routier','transporteur logistique','entreprise transport marchandises'];
+    const seen = new Map();
+    for (const q of queries) {
+      try {
+        const r = await fetch('https://places.googleapis.com/v1/places:searchText', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','X-Goog-Api-Key':GKEY,'X-Goog-FieldMask':'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.currentOpeningHours,places.photos,places.location,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri'},
+          body:JSON.stringify({textQuery:q,locationBias:{circle:{center:{latitude:tfLat,longitude:tfLng},radius}},languageCode:'fr',maxResultCount:20})
+        });
+        const d = await r.json();
+        (d.places||[]).forEach(p=>{if(!seen.has(p.id))seen.set(p.id,p);});
+      } catch(e){}
+    }
+    tfResults = Array.from(seen.values()).map(p=>({
+      id:p.id,name:p.displayName?.text||'Nom inconnu',address:p.formattedAddress||'Adresse non disponible',
+      rating:p.rating??null,reviews:p.userRatingCount??0,open:p.currentOpeningHours?.openNow??null,
+      photo:p.photos?.[0]?.name??null,distance:km(tfLat,tfLng,p.location?.latitude??tfLat,p.location?.longitude??tfLng),
+      phone:p.nationalPhoneNumber??null,website:p.websiteUri??null,gmaps:p.googleMapsUri??null,
+    })).filter(c=>c.distance<=radius/1000).sort((a,b)=>a.distance-b.distance);
+    incrementSearch();
+    document.getElementById('tfCount').innerHTML=`<span>${tfResults.length}</span> société${tfResults.length>1?'s':''} trouvée${tfResults.length>1?'s':''}`;
+    document.getElementById('tfLoc').textContent=`près de ${tfLabel} · rayon ${radius/1000} km · ${3-searchCount} recherche${3-searchCount>1?'s':''} restante${3-searchCount>1?'s':''}`;
+    tfRenderCards();
+  } catch(err) {
+    document.getElementById('tfCards').innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">⚠️</div><h3>Erreur</h3><p>${err.message}</p></div>`;
+  }
+}
+
+function tfSortAndRender(){const v=document.getElementById('tfSort').value;if(v==='rating')tfResults.sort((a,b)=>(b.rating??0)-(a.rating??0));else if(v==='name')tfResults.sort((a,b)=>a.name.localeCompare(b.name));else tfResults.sort((a,b)=>a.distance-b.distance);tfRenderCards();}
+function tfPhotoUrl(name){return name?`https://places.googleapis.com/v1/${name}/media?maxWidthPx=80&key=${GKEY}`:null;}
+function tfRenderCards(){
+  const grid=document.getElementById('tfCards');
+  if(!tfResults.length){grid.innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">🔍</div><h3>Aucun résultat</h3><p>Essayez un rayon plus grand</p></div>`;return;}
+  grid.innerHTML=tfResults.map((c,i)=>{
+    const stars=c.rating?`<span class="tf-stars">${'★'.repeat(Math.floor(c.rating))}${'☆'.repeat(5-Math.floor(c.rating))}</span><span class="tf-rating">${c.rating.toFixed(1)}</span><span class="tf-rcount">(${c.reviews})</span>`:'<span style="font-size:.75rem;color:rgba(255,255,255,.25)">Pas noté</span>';
+    const photo=tfPhotoUrl(c.photo);
+    const img=photo?`<img src="${photo}" loading="lazy" onerror="this.parentElement.innerHTML='🏢'"/>`:'🏢';
+    const badge=c.open===true?'<span class="tf-badge tf-badge-open">● Ouvert</span>':c.open===false?'<span class="tf-badge tf-badge-closed">● Fermé</span>':'';
+    return `<div class="tf-card" style="animation-delay:${i*55}ms" onclick="tfOpenModal(${i})">
+      <div class="tf-card-head"><div class="tf-avatar">${img}</div><div>${badge}</div></div>
+      <div class="tf-name">${c.name}</div>
+      <div class="tf-addr">📍 ${c.address}</div>
+      <div class="tf-stats"><div>${stars}</div><span class="tf-dist">${c.distance} km</span></div>
+      <div class="tf-actions">
+        ${c.phone?`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();window.location.href='tel:${c.phone.replace(/\s/g,'')}'"">📞 Appeler</button>`:`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();tfOpenModal(${i})">📞 Contacter</button>`}
+        <button class="tf-btn tf-btn-detail" onclick="event.stopPropagation();tfOpenModal(${i})">Détails →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function tfOpenModal(idx){
+  const c=tfResults[idx];if(!c)return;
+  const hours=c.open===true?'<span style="color:#34d399">Ouvert maintenant</span>':c.open===false?'<span style="color:#f87171">Fermé maintenant</span>':'<span style="color:rgba(255,255,255,.3)">Non renseigné</span>';
+  const photo=tfPhotoUrl(c.photo);
+  document.getElementById('modalHeader').innerHTML=`${photo?`<img src="${photo}" style="width:100%;height:160px;object-fit:cover;border-radius:var(--r-xl) var(--r-xl) 0 0;display:block" onerror="this.remove()"/>`:''}
+  <div style="padding:${photo?'16':'24'}px 24px 0"><div class="modal-tag">Société de transport</div><div class="modal-name">${c.name}</div></div>`;
+  document.getElementById('modalBody').innerHTML=`<div>
+    <div class="modal-info-row"><span class="modal-info-icon">📍</span><div class="modal-info-content"><span class="modal-info-label">Adresse</span><span class="modal-info-val">${c.address}</span></div></div>
+    <div class="modal-info-row"><span class="modal-info-icon">📞</span><div class="modal-info-content"><span class="modal-info-label">Téléphone</span>${c.phone?`<a class="modal-info-val modal-info-link" href="tel:${c.phone.replace(/\s/g,'')}">${c.phone}</a>`:'<span class="modal-info-val" style="color:rgba(255,255,255,.3)">Non renseigné</span>'}</div></div>
+    <div class="modal-info-row"><span class="modal-info-icon">🌐</span><div class="modal-info-content"><span class="modal-info-label">Site web</span>${c.website?`<a class="modal-info-val modal-info-link" href="${c.website}" target="_blank">${c.website.replace(/^https?:\/\//,'').slice(0,40)}</a>`:'<span class="modal-info-val" style="color:rgba(255,255,255,.3)">Non renseigné</span>'}</div></div>
+    ${c.rating?`<div class="modal-info-row"><span class="modal-info-icon">⭐</span><div class="modal-info-content"><span class="modal-info-label">Note Google</span><span class="modal-info-val" style="color:var(--amber)">${'★'.repeat(Math.floor(c.rating))} ${c.rating}/5 · ${c.reviews} avis</span></div></div>`:''}
+    <div class="modal-info-row"><span class="modal-info-icon">🕐</span><div class="modal-info-content"><span class="modal-info-label">Statut</span><div>${hours}</div></div></div>
+    <div class="modal-info-row"><span class="modal-info-icon">◎</span><div class="modal-info-content"><span class="modal-info-label">Distance</span><span class="modal-info-val" style="color:#5b8aff">${c.distance} km</span></div></div>
+  </div>`;
+  let btns='';
+  if(c.phone)btns+=`<button class="mbtn mbtn-call" onclick="window.location.href='tel:${c.phone.replace(/\s/g,'')}'"">📞 Appeler</button>`;
+  if(c.website)btns+=`<button class="mbtn mbtn-web" onclick="window.open('${c.website}','_blank')">🌐 Site web</button>`;
+  if(c.gmaps)btns+=`<button class="mbtn mbtn-gmaps" onclick="window.open('${c.gmaps}','_blank')">🗺 Maps</button>`;
+  btns+=`<button class="mbtn mbtn-close" onclick="closeModal()">Fermer</button>`;
+  document.getElementById('modalFooter').innerHTML=btns;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+document.getElementById('tfSearchBtn').addEventListener('click',tfSearch);
+document.getElementById('tfCityInput').addEventListener('keydown',e=>{if(e.key==='Enter')tfSearch();});
+document.getElementById('tfGeoBtn').addEventListener('click',()=>{
+  if(!navigator.geolocation){showToast('Non supporté',true);return;}
+  const btn=document.getElementById('tfGeoBtn');
+  btn.textContent='📡 Localisation…';btn.disabled=true;
+  navigator.geolocation.getCurrentPosition(
+    pos=>{tfLat=pos.coords.latitude;tfLng=pos.coords.longitude;tfLabel='Votre position';document.getElementById('tfCityInput').value='';document.getElementById('tfCityInput').placeholder='📍 Position détectée !';btn.textContent='✅ Localisé !';tfSearch().finally(()=>{btn.textContent='📡 Me géolocaliser';btn.disabled=false;});},
+    ()=>{btn.textContent='📡 Me géolocaliser';btn.disabled=false;showToast('⚠ Localisation refusée',true);},{timeout:8000}
+  );
+});
+
+// ══ SIMULATEUR REVENUS ════════════════
+let rozCountry='be';
+function rozFmt(n){return Math.round(n).toLocaleString('fr-BE')+'\u00a0€';}
+function rozSetCountry(c){
+  rozCountry=c;
+  document.getElementById('roz-tab-be').className='roz-tab roz-tab-be'+(c==='be'?' active':'');
+  document.getElementById('roz-tab-fr').className='roz-tab roz-tab-fr'+(c==='fr'?' active':'');
+  if(c==='be'){document.getElementById('roz-infobox').innerHTML='<span class="roz-flag">BE</span> <strong>Belgique :</strong> Cotisations ~20,5% sur le bénéfice net.';document.getElementById('roz-cotTaux').value='20.5';document.getElementById('roz-cotMin').value='121.14';document.getElementById('roz-cot-label').textContent='Taux cotisations (% bénéfice net)';document.getElementById('roz-cot2-label').textContent='Cotisation minimale / trimestre';document.getElementById('roz-cot-hint').textContent='Taux standard ~20,5%';document.getElementById('roz-cot2-hint').textContent='Appliquée si bénéfice faible';}
+  else{document.getElementById('roz-infobox').innerHTML='<span class="roz-flag">FR</span> <strong>France :</strong> Cotisations ~22% sur le CA brut. Abattement forfaitaire 71%.';document.getElementById('roz-cotTaux').value='22';document.getElementById('roz-cotMin').value='71';document.getElementById('roz-cot-label').textContent='Taux cotisations (% CA brut)';document.getElementById('roz-cot2-label').textContent='Abattement forfaitaire (%)';document.getElementById('roz-cot-hint').textContent='Taux micro-entrepreneur ~22%';document.getElementById('roz-cot2-hint').textContent='Abattement transport 71%';}
+  rozCalc();
+}
+function rozCalc(){
+  const t=parseFloat(document.getElementById('roz-tarif').value)||0,l=parseFloat(document.getElementById('roz-livj').value)||0,j=parseFloat(document.getElementById('roz-jours').value)||0;
+  const ch=(parseFloat(document.getElementById('roz-carb').value)||0)+(parseFloat(document.getElementById('roz-assur').value)||0)+(parseFloat(document.getElementById('roz-entret').value)||0)+(parseFloat(document.getElementById('roz-leasing').value)||0)+(parseFloat(document.getElementById('roz-autres').value)||0);
+  const ct=parseFloat(document.getElementById('roz-cotTaux').value)||0,cm=parseFloat(document.getElementById('roz-cotMin').value)||0;
+  const ca=t*l*j;let bn,cotis,rn;
+  if(rozCountry==='be'){bn=ca-ch;cotis=Math.max(bn>0?bn*(ct/100):0,cm*3);rn=bn-cotis;}else{bn=ca-ch;cotis=ca*(ct/100);rn=bn-cotis;}
+  const nj=j>0?rn/j:0,na=rn*12;
+  document.getElementById('roz-net-big').textContent=rozFmt(rn);document.getElementById('roz-ca-brut').textContent=rozFmt(ca);document.getElementById('roz-tot-charges').textContent=rozFmt(ch);document.getElementById('roz-benef-net').textContent=rozFmt(bn);document.getElementById('roz-cotis').textContent=rozFmt(cotis);document.getElementById('roz-net-jour').textContent=rozFmt(nj);document.getElementById('roz-net-an').textContent=rozFmt(na);
+  document.getElementById('roz-wf1').textContent=rozFmt(ca);document.getElementById('roz-wf2').textContent='− '+rozFmt(ch);document.getElementById('roz-wf3').textContent=rozFmt(bn);document.getElementById('roz-wf4').textContent='− '+rozFmt(cotis);document.getElementById('roz-wf5').textContent=rozFmt(rn);
+  const sc=ct<100?ch/(1-ct/100):ch*10,slm=t>0?sc/t:0,slj=j>0?slm/j:0,tc=ca>0?((ch+cotis)/ca)*100:0;
+  document.getElementById('roz-s-ca').textContent=rozFmt(sc);document.getElementById('roz-s-livmois').textContent=Math.ceil(slm)+' livr.';document.getElementById('roz-s-livjour').textContent=(Math.round(slj*10)/10)+' livr./jr';document.getElementById('roz-s-taux').textContent=(Math.round(tc*10)/10)+'%';
+  const r=sc>0?Math.min((ca/sc)*100,100):0;document.getElementById('roz-prog-fill').style.width=r+'%';
+  const m=document.getElementById('roz-rentable');
+  if(ca>=sc&&ca>0){m.textContent='✓ Rentable — vous dépassez le seuil de '+Math.round((ca/sc)*100)+'%';m.className='roz-rentable roz-ok';}else if(ca>0){m.textContent='✗ Pas encore rentable — il manque '+Math.round(sc-ca).toLocaleString('fr-BE')+' € de CA';m.className='roz-rentable roz-ko';}else{m.textContent='';m.className='roz-rentable';}
+}
+['roz-tarif','roz-livj','roz-jours','roz-carb','roz-assur','roz-entret','roz-leasing','roz-autres','roz-cotTaux','roz-cotMin'].forEach(id=>{document.getElementById(id).addEventListener('input',rozCalc);});
+rozSetCountry('be');
+
+// ══ SIMULATEUR CHARGES ════════════════
+let salCountry='fr';
+const salData={fr:{infos:{cdi:"CDI : période d'essai 1-4 mois. Pas de prime de fin de contrat.",cdd:"CDD : durée max 18 mois. Prime de précarité 10% en fin de contrat.",interim:"Intérim : +10% IFM + 10% congés payés intégrés.",alternance:"Alternance : salaire en % du SMIC. Exonérations importantes."},sal:{cdi:[["Assurance maladie",0.0075],["Vieillesse plafonnée",0.069],["Vieillesse déplafonnée",0.004],["Assurance chômage",0.024],["Retraite complémentaire",0.032],["CEG",0.0086],["CSG déductible",0.068],["CSG/CRDS non déductible",0.029]],cdd:[["Assurance maladie",0.0075],["Vieillesse plafonnée",0.069],["Vieillesse déplafonnée",0.004],["Assurance chômage",0.024],["Retraite complémentaire",0.032],["CEG",0.0086],["CSG déductible",0.068],["CSG/CRDS non déductible",0.029]],interim:[["Assurance maladie",0.0075],["Vieillesse plafonnée",0.069],["Vieillesse déplafonnée",0.004],["Assurance chômage",0.024],["Retraite complémentaire",0.032],["CEG",0.0086],["CSG déductible",0.068],["CSG/CRDS non déductible",0.029]],alternance:[["Vieillesse plafonnée",0.069],["Vieillesse déplafonnée",0.004],["Retraite complémentaire",0.032]]},pat:{cdi:[["Assurance maladie",0.13],["Accidents du travail",0.022],["Vieillesse plafonnée",0.0855],["Vieillesse déplafonnée",0.018],["Allocations familiales",0.0345],["Assurance chômage",0.0405],["Retraite complémentaire",0.0486],["CEG patronal",0.0129],["FNAL",0.001],["Formation professionnelle",0.01]],cdd:[["Assurance maladie",0.13],["Accidents du travail",0.022],["Vieillesse plafonnée",0.0855],["Vieillesse déplafonnée",0.018],["Allocations familiales",0.0345],["Assurance chômage",0.0405],["Retraite complémentaire",0.0486],["CEG patronal",0.0129],["Formation professionnelle",0.01]],interim:[["Assurance maladie",0.13],["Accidents du travail (majoré)",0.035],["Vieillesse plafonnée",0.0855],["Vieillesse déplafonnée",0.018],["Allocations familiales",0.0345],["Assurance chômage",0.0405],["Retraite complémentaire",0.0486],["CEG patronal",0.0129],["Formation professionnelle",0.02]],alternance:[["Accidents du travail",0.022],["Formation professionnelle",0.01],["FNAL",0.001]]},primePre:{cdi:0,cdd:0.10,interim:0,alternance:0},ifm:{cdi:0,cdd:0,interim:0.10,alternance:0}},be:{infos:{cdi:"CDI Belgique : ONSS obligatoire dès le 1er jour. Enregistrement DIMONA obligatoire.",cdd:"CDD Belgique : mêmes cotisations ONSS. Indemnité de rupture si résiliation anticipée.",interim:"Intérim : cotisations majorées + prime de fin de mission (IFM 8%).",alternance:"Alternance : cotisations ONSS fortement réduites. Taux variables selon la région."},sal:{cdi:[["ONSS salarié",0.1307],["Cotisation spéciale chômage",0.0087],["Précompte professionnel (~11%)",0.11]],cdd:[["ONSS salarié",0.1307],["Cotisation spéciale chômage",0.0087],["Précompte professionnel (~11%)",0.11]],interim:[["ONSS salarié",0.1307],["Cotisation spéciale chômage",0.0087],["Précompte professionnel (~11%)",0.11]],alternance:[["ONSS apprenti (réduit)",0.065],["Précompte professionnel (~5%)",0.05]]},pat:{cdi:[["ONSS patronal de base",0.2535],["Cotisation modération salariale",0.0068],["Fonds de fermeture",0.002],["Contribution formation",0.001],["Assurance accidents du travail",0.015],["Médecine du travail",0.008]],cdd:[["ONSS patronal de base",0.2535],["Cotisation modération salariale",0.0068],["Fonds de fermeture",0.002],["Contribution formation",0.001],["Assurance accidents du travail",0.015],["Médecine du travail",0.008]],interim:[["ONSS patronal (majoré)",0.27],["Fonds de fermeture",0.002],["Assurance accidents du travail",0.02],["Médecine du travail",0.008]],alternance:[["ONSS patronal apprenti (réduit)",0.05],["Assurance accidents du travail",0.015],["Médecine du travail",0.008]]},primePre:{cdi:0,cdd:0,interim:0,alternance:0},ifm:{cdi:0,cdd:0,interim:0.08,alternance:0}}};
+function salFmt(n){return Number(n).toLocaleString('fr-BE',{minimumFractionDigits:0,maximumFractionDigits:0})+' €';}
+function salPct(n){return(n*100).toFixed(2)+'%';}
+function salSetCountry(c){salCountry=c;document.getElementById('sal-btn-fr').className='sal-tab sal-tab-fr'+(c==='fr'?' active':'');document.getElementById('sal-btn-be').className='sal-tab sal-tab-be'+(c==='be'?' active':'');document.getElementById('sal-infobox').className='sal-infobox sal-info-'+c;salCompute();}
+function salCompute(){
+  const c=salCountry,contrat=document.getElementById('sal-contrat').value;
+  const brut=parseFloat(document.getElementById('sal-brut').value)||2500,temps=parseFloat(document.getElementById('sal-temps').value);
+  const base=brut*temps,d=salData[c],primePre=(d.primePre[contrat]||0)*base,ifm=(d.ifm[contrat]||0)*base;
+  const baseCalc=(c==='fr'&&contrat==='interim')?base+ifm:base;
+  const salRows=d.sal[contrat]||d.sal.cdi,patRows=d.pat[contrat]||d.pat.cdi;
+  let totalSal=0,totalPat=0,htmlSal='',htmlPat='';
+  for(const[name,rate]of salRows){if(rate===0)continue;const amt=baseCalc*rate;totalSal+=amt;htmlSal+=`<tr><td>${name}</td><td>${salPct(rate)}</td><td>${salFmt(amt)}</td></tr>`;}
+  htmlSal+=`<tr class="sal-tot"><td colspan="2">Total cotisations</td><td>${salFmt(totalSal)}</td></tr>`;
+  for(const[name,rate]of patRows){if(rate===0)continue;const amt=baseCalc*rate;totalPat+=amt;htmlPat+=`<tr><td>${name}</td><td>${salPct(rate)}</td><td>${salFmt(amt)}</td></tr>`;}
+  htmlPat+=`<tr class="sal-tot"><td colspan="2">Total charges</td><td>${salFmt(totalPat)}</td></tr>`;
+  document.getElementById('sal-tsal').innerHTML=htmlSal;document.getElementById('sal-tpat').innerHTML=htmlPat;
+  const net=baseCalc-totalSal,coutTotal=baseCalc+totalPat+primePre,tauxGlobal=totalPat/(base||1);
+  document.getElementById('sal-metrics').innerHTML=`<div class="sal-metric"><div class="sal-metric-label">Salaire brut</div><div class="sal-metric-value">${salFmt(base)}</div><div class="sal-metric-sub">${temps<1?Math.round(temps*100)+'% temps plein':'temps plein'}</div></div><div class="sal-metric"><div class="sal-metric-label">Salaire net estimé</div><div class="sal-metric-value">${salFmt(net)}</div><div class="sal-metric-sub">avant impôt sur le revenu</div></div><div class="sal-metric"><div class="sal-metric-label">Charges patronales</div><div class="sal-metric-value">${salFmt(totalPat)}</div><div class="sal-metric-sub">${salPct(tauxGlobal)} du brut</div></div><div class="sal-metric"><div class="sal-metric-label">Coût employeur total</div><div class="sal-metric-value">${salFmt(coutTotal)}</div><div class="sal-metric-sub">tout compris${primePre>0?' + prime précarité':''}</div></div>`;
+  document.getElementById('sal-infobox').textContent=d.infos[contrat]||'';
+}
+['sal-contrat','sal-categorie','sal-brut','sal-temps'].forEach(id=>{document.getElementById(id).addEventListener('input',salCompute);});
+salCompute();
+
+// ══ MODAL + TOAST ══════════════════════
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+function showToast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'var(--red)':'var(--green)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
+
+// Affiche bannière si limite déjà atteinte
+if(searchCount>=3)document.getElementById('limitBanner').style.display='flex';
+</script>
+</body>
+</html>
