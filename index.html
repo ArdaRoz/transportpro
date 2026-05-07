@@ -442,7 +442,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
         <!-- STARTER -->
         <div class="price-card">
           <div class="price-name">Starter</div>
-          <div class="price-amount">9<span>€/mois</span></div>
+          <div class="price-amount">9<span>.99€/mois</span></div>
           <div class="price-period">Accès à la recherche de transporteurs</div>
           <div class="price-features">
             <div class="price-feat"><span class="price-feat-icon">✓</span>Recherche de transporteurs</div>
@@ -453,7 +453,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
             <div class="price-feat price-feat-no"><span class="price-feat-icon">✗</span><span style="color:rgba(255,255,255,.25)">Simulateur de charges</span></div>
             <div class="price-feat price-feat-no"><span class="price-feat-icon">✗</span><span style="color:rgba(255,255,255,.25)">Recherches illimitées</span></div>
           </div>
-          <button class="btn btn-outline btn-full btn-lg" data-ms-price:add="prc_starter-mw82039c" onclick="msSignup(event, 'prc_starter-mw82039c')">Commencer — 9€/mois →</button>
+          <button class="btn btn-outline btn-full btn-lg" data-ms-price:add="prc_starter-mw82039c" onclick="msSignup(event, 'prc_starter-mw82039c')">Commencer — 9,99€/mois →</button>
         </div>
 
         <!-- PRO -->
@@ -477,7 +477,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
         <!-- ENTREPRISE -->
         <div class="price-card price-card-entreprise">
           <div class="price-name">Entreprise</div>
-          <div class="price-amount">79<span>€/mois</span></div>
+          <div class="price-amount">79<span>.99€/mois</span></div>
           <div class="price-period">Pour les sociétés de transport</div>
           <div class="price-features">
             <div class="price-feat"><span class="price-feat-icon">✓</span>Profil mis en avant dans les résultats</div>
@@ -488,7 +488,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
             <div class="price-feat"><span class="price-feat-icon">✓</span>Support VIP dédié</div>
             <div class="price-feat"><span class="price-feat-icon">✓</span>Accès aux futures fonctionnalités</div>
           </div>
-          <button class="btn btn-amber btn-full btn-lg" data-ms-price:add="prc_entreprise-ib6k0elp" onclick="msSignup(event, 'prc_entreprise-ib6k0elp')">Commencer — 79€/mois →</button>
+          <button class="btn btn-amber btn-full btn-lg" data-ms-price:add="prc_entreprise-ib6k0elp" onclick="msSignup(event, 'prc_entreprise-ib6k0elp')">Commencer — 79,99€/mois →</button>
         </div>
 
       </div>
@@ -528,7 +528,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
       <p>Rejoignez les chauffeurs qui utilisent TransportPro pour trouver des missions et optimiser leurs revenus.</p>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
         <button class="btn btn-primary btn-lg" onclick="goToStripe('pro')">Commencer Pro — 29,99€/mois →</button>
-        <button class="btn btn-outline btn-lg" onclick="goToStripe('starter')">Plan Starter — 9€/mois</button>
+        <button class="btn btn-outline btn-lg" onclick="goToStripe('starter')">Plan Starter — 9,99€/mois</button>
       </div>
     </div>
   </section>
@@ -819,41 +819,40 @@ async function accessTool(tool) {
     const member = await window.$memberstackDom.getCurrentMember();
     if (member && member.data) {
       const plans = member.data.planConnections || [];
+      console.log('Plans:', JSON.stringify(plans));
+
+      // Check if any plan is active (starter or higher)
+      const hasAnyPlan = plans.length > 0;
       
-      // Check plan types
-      const hasStarter = plans.some(p => 
-        p.priceId === 'prc_starter-mw82039c' && p.status === 'ACTIVE'
-      );
+      // Check for Pro/Entreprise
       const hasPro = plans.some(p => 
-        (p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp') 
-        && p.status === 'ACTIVE'
+        p.priceId === 'prc_pro-ei8103c9' || 
+        p.priceId === 'prc_entreprise-ib6k0elp' ||
+        p.planId === 'pln_pro-888003rj' ||
+        p.planId === 'pln_entreprise-237m0uzz'
       );
 
       if (tool === 'finder') {
-        // Starter + Pro can access finder
-        if (hasStarter || hasPro) {
+        if (hasAnyPlan) {
           showPage('finder');
         } else {
-          showToast('⚠ Abonnement requis pour accéder à cet outil', true);
-          scrollToPricing();
+          await window.$memberstackDom.openModal('SIGNUP');
         }
       } else if (tool === 'revenus' || tool === 'charges') {
-        // Only Pro + Entreprise can access simulators
         if (hasPro) {
           showPage(tool);
-        } else if (hasStarter) {
-          showToast('⚠ Ces outils nécessitent le plan Pro', true);
-          setTimeout(() => scrollToPricing(), 1500);
+        } else if (hasAnyPlan) {
+          showToast('⚠ Ces outils nécessitent le plan Pro (29,99€/mois)', true);
+          setTimeout(() => scrollToPricing(), 2000);
         } else {
-          showToast('⚠ Abonnement requis', true);
-          scrollToPricing();
+          await window.$memberstackDom.openModal('SIGNUP');
         }
       }
     } else {
-      // Not logged in - show signup
       await window.$memberstackDom.openModal('SIGNUP');
     }
   } catch(e) {
+    console.log('MS error:', e);
     showPage(tool);
   }
 }
