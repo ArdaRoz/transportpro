@@ -1042,6 +1042,17 @@ function showToast(msg,err=false){const t=document.getElementById('toast');t.tex
 
 // Affiche bannière si limite déjà atteinte
 if(searchCount>=3)document.getElementById('limitBanner').style.display='flex';
+
+// ══ AUTO RELOAD ON LOGIN/LOGOUT ══════
+window.addEventListener('memberstack.login', function() {
+  window.location.reload();
+});
+window.addEventListener('memberstack.logout', function() {
+  window.location.reload();
+});
+window.addEventListener('memberstack.transaction.success', function() {
+  setTimeout(function() { window.location.reload(); }, 1500);
+});
 </script>
 </body>
 </html>
