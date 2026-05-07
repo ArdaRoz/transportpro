@@ -378,19 +378,19 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
         <p class="section-sub">Une plateforme complète pour gérer votre activité de chauffeur indépendant.</p>
       </div>
       <div class="tools-grid">
-        <div class="tool-card" onclick="scrollToPricing()">
+        <div class="tool-card" onclick="accessTool('finder')">
           <div class="tool-icon tool-icon-blue">🔍</div>
           <h3>TransportFinder</h3>
           <p>Trouvez des sociétés de transport près de vous. Données réelles Google, distances, téléphones, sites web.</p>
           <span class="tool-tag tool-tag-starter">Starter & Pro</span>
         </div>
-        <div class="tool-card" onclick="showPage('revenus')">
+        <div class="tool-card" onclick="accessTool('revenus')">
           <div class="tool-icon tool-icon-amber">💰</div>
           <h3>Simulateur de Revenus</h3>
           <p>Calculez votre revenu net en tant qu'indépendant. Seuil de rentabilité, cotisations sociales FR & BE.</p>
           <span class="tool-tag tool-tag-pro">Plan Pro uniquement</span>
         </div>
-        <div class="tool-card" onclick="showPage('charges')">
+        <div class="tool-card" onclick="accessTool('charges')">
           <div class="tool-icon tool-icon-green">📊</div>
           <h3>Simulateur de Charges</h3>
           <p>Calculez les charges salariales et patronales. CDI, CDD, intérim, alternance. France & Belgique.</p>
@@ -813,6 +813,46 @@ async function checkMember() {
   } catch(e) {}
 }
 window.addEventListener('load', checkMember);
+
+async function accessTool(tool) {
+  try {
+    const member = await window.$memberstackDom.getCurrentMember();
+    if (member && member.data) {
+      const plans = member.data.planConnections || [];
+      const hasStarter = plans.some(p => 
+        p.planId === 'pln_starter-2c70ujw' || 
+        p.priceId === 'prc_starter-mw82039c' ||
+        p.status === 'ACTIVE'
+      );
+      const hasPro = plans.some(p => 
+        p.planId === 'pln_pro-888003rj' || 
+        p.priceId === 'prc_pro-ei8103c9' ||
+        p.planId === 'pln_entreprise-237m0uzz' ||
+        p.priceId === 'prc_entreprise-ib6k0elp' ||
+        p.status === 'ACTIVE'
+      );
+      
+      if (tool === 'finder' && (hasStarter || hasPro || plans.length > 0)) {
+        showPage('finder');
+      } else if ((tool === 'revenus' || tool === 'charges') && (hasPro || plans.length > 0)) {
+        showPage(tool);
+      } else if (plans.length > 0) {
+        // Has any active plan, allow access
+        showPage(tool);
+      } else {
+        scrollToPricing();
+      }
+    } else {
+      // Not logged in
+      await window.$memberstackDom.openModal('SIGNUP');
+    }
+  } catch(e) {
+    // If Memberstack not loaded, show page anyway
+    showPage(tool);
+  }
+}
+
+
 
 function goToStripe(plan) {
   window.open(STRIPE[plan], '_blank');
