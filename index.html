@@ -1044,15 +1044,24 @@ function showToast(msg,err=false){const t=document.getElementById('toast');t.tex
 if(searchCount>=3)document.getElementById('limitBanner').style.display='flex';
 
 // ══ AUTO RELOAD ON LOGIN/LOGOUT ══════
-window.addEventListener('memberstack.login', function() {
-  window.location.reload();
-});
-window.addEventListener('memberstack.logout', function() {
-  window.location.reload();
-});
-window.addEventListener('memberstack.transaction.success', function() {
-  setTimeout(function() { window.location.reload(); }, 1500);
-});
+// Poll member state every 2 seconds and reload if it changes
+let _prevMemberState = null;
+setInterval(async function() {
+  try {
+    const member = await window.$memberstackDom.getCurrentMember();
+    const currentState = member && member.data ? member.data.id : null;
+    if (_prevMemberState !== null && _prevMemberState !== currentState) {
+      window.location.reload();
+    }
+    _prevMemberState = currentState;
+  } catch(e) {}
+}, 2000);
+
+// Also try native events
+if (window.$memberstackDom) {
+  window.$memberstackDom.on('memberstack.login', function() { window.location.reload(); });
+  window.$memberstackDom.on('memberstack.logout', function() { window.location.reload(); });
+}
 </script>
 </body>
 </html>
