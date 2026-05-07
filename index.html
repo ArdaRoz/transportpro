@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TransportPro — La plateforme des chauffeurs indépendants</title>
 <meta name="description" content="Trouvez des sociétés de transport, calculez vos revenus et simulez vos charges. L'outil indispensable du chauffeur indépendant en France et Belgique."/>
+<!-- Memberstack -->
+<script data-memberstack-app="app_cmouj89r400020sz3f45tfk3e" src="https://static.memberstack.com/scripts/v1/memberstack.js" type="text/javascript"></script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 :root {
@@ -451,7 +453,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
             <div class="price-feat price-feat-no"><span class="price-feat-icon">✗</span><span style="color:rgba(255,255,255,.25)">Simulateur de charges</span></div>
             <div class="price-feat price-feat-no"><span class="price-feat-icon">✗</span><span style="color:rgba(255,255,255,.25)">Recherches illimitées</span></div>
           </div>
-          <button class="btn btn-outline btn-full btn-lg" onclick="goToStripe('starter')">Commencer — 9€/mois →</button>
+          <button class="btn btn-outline btn-full btn-lg" data-ms-price:add="pln_starter-2c70ujw" onclick="msSignup(event, 'pln_starter-2c70ujw')">Commencer — 9€/mois →</button>
         </div>
 
         <!-- PRO -->
@@ -469,7 +471,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
             <div class="price-feat"><span class="price-feat-icon">✓</span>France & Belgique</div>
             <div class="price-feat"><span class="price-feat-icon">✓</span>Support prioritaire</div>
           </div>
-          <button class="btn btn-primary btn-full btn-lg" onclick="goToStripe('pro')">Commencer — 29,99€/mois →</button>
+          <button class="btn btn-primary btn-full btn-lg" data-ms-price:add="pln_pro-888003rj" onclick="msSignup(event, 'pln_pro-888003rj')">Commencer — 29,99€/mois →</button>
         </div>
 
         <!-- ENTREPRISE -->
@@ -486,7 +488,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
             <div class="price-feat"><span class="price-feat-icon">✓</span>Support VIP dédié</div>
             <div class="price-feat"><span class="price-feat-icon">✓</span>Accès aux futures fonctionnalités</div>
           </div>
-          <button class="btn btn-amber btn-full btn-lg" onclick="goToStripe('entreprise')">Commencer — 79€/mois →</button>
+          <button class="btn btn-amber btn-full btn-lg" data-ms-price:add="pln_entreprise-237m0uzz" onclick="msSignup(event, 'pln_entreprise-237m0uzz')">Commencer — 79€/mois →</button>
         </div>
 
       </div>
@@ -769,6 +771,49 @@ function scrollToPricing() {
   showPage('landing');
   setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior:'smooth' }), 100);
 }
+
+// ══ MEMBERSTACK ══════════════════════
+const MS_PLANS = {
+  starter: 'pln_starter-2c70ujw',
+  pro: 'pln_pro-888003rj',
+  entreprise: 'pln_entreprise-237m0uzz'
+};
+
+async function msSignup(e, planId) {
+  e.preventDefault();
+  try {
+    const member = await window.$memberstackDom.getCurrentMember();
+    if (member && member.data) {
+      await window.$memberstackDom.purchasePlansWithCheckout({ priceId: planId });
+    } else {
+      await window.$memberstackDom.openModal('SIGNUP', { planId: planId });
+    }
+  } catch(err) {
+    console.log('MS error:', err);
+    showToast('Redirection vers le paiement...', false);
+  }
+}
+
+async function checkMember() {
+  try {
+    const member = await window.$memberstackDom.getCurrentMember();
+    if (member && member.data) {
+      const plans = member.data.planConnections || [];
+      const hasPro = plans.some(p => p.planId === MS_PLANS.pro || p.planId === MS_PLANS.entreprise);
+      const hasStarter = plans.some(p => p.planId === MS_PLANS.starter);
+      const navCta = document.querySelector('.nav-cta');
+      if (navCta) {
+        navCta.textContent = 'Mon compte ▾';
+        navCta.onclick = () => window.$memberstackDom.openModal('PROFILE');
+      }
+      if (hasPro || hasStarter) {
+        showPage('finder');
+      }
+    }
+  } catch(e) {}
+}
+window.addEventListener('load', checkMember);
+
 function goToStripe(plan) {
   window.open(STRIPE[plan], '_blank');
 }
