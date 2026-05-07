@@ -819,35 +819,41 @@ async function accessTool(tool) {
     const member = await window.$memberstackDom.getCurrentMember();
     if (member && member.data) {
       const plans = member.data.planConnections || [];
+      
+      // Check plan types
       const hasStarter = plans.some(p => 
-        p.planId === 'pln_starter-2c70ujw' || 
-        p.priceId === 'prc_starter-mw82039c' ||
-        p.status === 'ACTIVE'
+        p.priceId === 'prc_starter-mw82039c' && p.status === 'ACTIVE'
       );
       const hasPro = plans.some(p => 
-        p.planId === 'pln_pro-888003rj' || 
-        p.priceId === 'prc_pro-ei8103c9' ||
-        p.planId === 'pln_entreprise-237m0uzz' ||
-        p.priceId === 'prc_entreprise-ib6k0elp' ||
-        p.status === 'ACTIVE'
+        (p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp') 
+        && p.status === 'ACTIVE'
       );
-      
-      if (tool === 'finder' && (hasStarter || hasPro || plans.length > 0)) {
-        showPage('finder');
-      } else if ((tool === 'revenus' || tool === 'charges') && (hasPro || plans.length > 0)) {
-        showPage(tool);
-      } else if (plans.length > 0) {
-        // Has any active plan, allow access
-        showPage(tool);
-      } else {
-        scrollToPricing();
+
+      if (tool === 'finder') {
+        // Starter + Pro can access finder
+        if (hasStarter || hasPro) {
+          showPage('finder');
+        } else {
+          showToast('⚠ Abonnement requis pour accéder à cet outil', true);
+          scrollToPricing();
+        }
+      } else if (tool === 'revenus' || tool === 'charges') {
+        // Only Pro + Entreprise can access simulators
+        if (hasPro) {
+          showPage(tool);
+        } else if (hasStarter) {
+          showToast('⚠ Ces outils nécessitent le plan Pro', true);
+          setTimeout(() => scrollToPricing(), 1500);
+        } else {
+          showToast('⚠ Abonnement requis', true);
+          scrollToPricing();
+        }
       }
     } else {
-      // Not logged in
+      // Not logged in - show signup
       await window.$memberstackDom.openModal('SIGNUP');
     }
   } catch(e) {
-    // If Memberstack not loaded, show page anyway
     showPage(tool);
   }
 }
