@@ -342,6 +342,8 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
     <div class="nav-links">
       <button class="nav-link" onclick="scrollToPricing()">Nos outils</button>
       <button class="nav-link" onclick="scrollToPricing()">Tarifs</button>
+      <button class="nav-link" onclick="showPage('faq')">FAQ</button>
+      <button class="nav-link" onclick="showPage('apropos')">À propos</button>
     </div>
     <button class="btn btn-primary nav-cta" onclick="scrollToPricing()">Voir les offres →</button>
     <button class="nav-burger" id="navBurger"><span></span><span></span><span></span></button>
@@ -365,6 +367,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
           <div class="proof-item"><div class="proof-dot"></div>Données Google Places réelles</div>
           <div class="proof-item"><div class="proof-dot"></div>France & Belgique</div>
           <div class="proof-item"><div class="proof-dot"></div>Paiement sécurisé Stripe</div>
+          <div class="proof-item"><div class="proof-dot"></div>Annulez à tout moment</div>
         </div>
       </div>
     </div>
@@ -551,9 +554,11 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
         <div class="footer-col">
           <h4>Légal</h4>
           <ul>
-            <li><a href="#">CGU</a></li>
-            <li><a href="#">Confidentialité</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><a href="#" onclick="showPage('apropos')">À propos</a></li>
+            <li><a href="#" onclick="showPage('cgv')">CGV & CGU</a></li>
+            <li><a href="#" onclick="showPage('mentions')">Mentions légales</a></li>
+            <li><a href="#" onclick="showPage('faq')">FAQ</a></li>
+            <li><a href="mailto:contact.transportpro0@gmail.com">Contact</a></li>
           </ul>
         </div>
       </div>
@@ -727,6 +732,184 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
           <div class="sal-col sal-card"><div class="sal-stitle">Charges patronales & taxes</div><table class="sal-table" id="sal-tpat"></table></div>
         </div>
         <p style="text-align:center;font-size:.75rem;color:rgba(255,255,255,.2);margin-top:16px">Taux indicatifs 2024-2025. Consultez un expert-comptable pour une simulation précise.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- À PROPOS PAGE -->
+<div id="page-apropos" class="page">
+  <div class="tool-page">
+    <div class="container">
+      <div class="tool-breadcrumb">
+        <button onclick="showPage('landing')">Accueil</button>
+        <span>›</span>
+        <span style="color:rgba(255,255,255,.7)">À propos</span>
+      </div>
+      <h2 class="tool-page-title">👋 À propos de TransportPro</h2>
+      <div style="max-width:760px;padding-bottom:60px;display:flex;flex-direction:column;gap:20px">
+        
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:14px;color:var(--white)">Notre histoire</h3>
+          <p style="font-size:.95rem;color:rgba(255,255,255,.7);line-height:1.8;">
+            TransportPro est né d'un constat simple : de nombreux chauffeurs et sous-traitants dans le secteur du transport galèrent à trouver des contrats et des sociétés avec lesquelles collaborer. En parallèle, beaucoup de sociétés de transport peinent à trouver des sous-traitants fiables.
+          </p>
+          <br/>
+          <p style="font-size:.95rem;color:rgba(255,255,255,.7);line-height:1.8;">
+            En tant que développeur passionné par la résolution de problèmes concrets, j'ai créé TransportPro pour combler ce manque — une plateforme simple, efficace et moderne qui connecte chauffeurs, sous-traitants et sociétés de transport en France et en Belgique.
+          </p>
+        </div>
+
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:14px;color:var(--white)">Notre mission</h3>
+          <p style="font-size:.95rem;color:rgba(255,255,255,.7);line-height:1.8;">
+            Permettre à chaque chauffeur indépendant de trouver facilement des opportunités de collaboration, et à chaque société de transport de trouver rapidement des sous-traitants qualifiés — le tout en quelques clics.
+          </p>
+        </div>
+
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:14px;color:var(--white)">Informations légales</h3>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:.9rem;color:rgba(255,255,255,.7)">
+            <div style="display:flex;gap:12px"><span style="color:rgba(255,255,255,.4);min-width:160px">Nom</span><span>TransportPro</span></div>
+            <div style="display:flex;gap:12px"><span style="color:rgba(255,255,255,.4);min-width:160px">Numéro BCE</span><span>BE0766.738.280</span></div>
+            <div style="display:flex;gap:12px"><span style="color:rgba(255,255,255,.4);min-width:160px">Pays</span><span>🇧🇪 Belgique</span></div>
+            <div style="display:flex;gap:12px"><span style="color:rgba(255,255,255,.4);min-width:160px">Email</span><a href="mailto:contact.transportpro0@gmail.com" style="color:var(--blue)">contact.transportpro0@gmail.com</a></div>
+            <div style="display:flex;gap:12px"><span style="color:rgba(255,255,255,.4);min-width:160px">Site web</span><span>www.transportpro.pro</span></div>
+          </div>
+        </div>
+
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:14px;color:var(--white)">Nous contacter</h3>
+          <p style="font-size:.95rem;color:rgba(255,255,255,.7);line-height:1.8;">
+            Une question, une suggestion ou un problème ? N'hésitez pas à nous écrire à <a href="mailto:contact.transportpro0@gmail.com" style="color:var(--blue)">contact.transportpro0@gmail.com</a>. Nous répondons dans les 24 heures.
+          </p>
+          <br/>
+          <a href="mailto:contact.transportpro0@gmail.com" class="btn btn-primary" style="display:inline-flex;margin-top:8px">✉️ Nous contacter</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ PAGE -->
+<div id="page-faq" class="page">
+  <div class="tool-page">
+    <div class="container">
+      <div class="tool-breadcrumb">
+        <button onclick="showPage('landing')">Accueil</button>
+        <span>›</span>
+        <span style="color:rgba(255,255,255,.7)">FAQ</span>
+      </div>
+      <h2 class="tool-page-title">❓ Questions fréquentes</h2>
+      <p class="tool-page-sub">Tout ce que vous devez savoir avant de vous abonner</p>
+      <div style="max-width:700px;display:flex;flex-direction:column;gap:16px;padding-bottom:60px">
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--white)">Combien de recherches puis-je faire par jour avec le plan Starter ?</h3>
+          <p style="font-size:.9rem;color:rgba(255,255,255,.6)">Avec le plan Starter à 9,99€/mois, vous avez droit à 3 recherches par jour. Pour des recherches illimitées, passez au plan Pro à 29,99€/mois.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--white)">Puis-je annuler mon abonnement à tout moment ?</h3>
+          <p style="font-size:.9rem;color:rgba(255,255,255,.6)">Oui, vous pouvez annuler votre abonnement à tout moment depuis votre espace "Mon compte". Aucun engagement, aucune pénalité.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--white)">Les données des entreprises sont-elles à jour ?</h3>
+          <p style="font-size:.9rem;color:rgba(255,255,255,.6)">Oui, les données proviennent directement de Google Places et sont mises à jour en temps réel. Vous avez accès aux informations les plus récentes disponibles.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--white)">La plateforme couvre-t-elle la Belgique et la France ?</h3>
+          <p style="font-size:.9rem;color:rgba(255,255,255,.6)">Oui ! TransportPro couvre l'ensemble de la France métropolitaine et la Belgique. Entrez n'importe quelle ville et trouvez des transporteurs autour de vous.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--white)">Comment contacter le support ?</h3>
+          <p style="font-size:.9rem;color:rgba(255,255,255,.6)">Vous pouvez nous contacter par email à <a href="mailto:contact.transportpro0@gmail.com" style="color:var(--blue)">contact.transportpro0@gmail.com</a>. Nous répondons dans les 24 heures.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--white)">Quelle est la différence entre Starter et Pro ?</h3>
+          <p style="font-size:.9rem;color:rgba(255,255,255,.6)">Le plan Starter (9,99€/mois) donne accès à la recherche de transporteurs avec 3 recherches par jour. Le plan Pro (29,99€/mois) inclut les recherches illimitées + le simulateur de revenus + le simulateur de charges salariales.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--white)">Mon paiement est-il sécurisé ?</h3>
+          <p style="font-size:.9rem;color:rgba(255,255,255,.6)">Oui, tous les paiements sont traités par Stripe, le leader mondial du paiement en ligne. Vos données bancaires ne sont jamais stockées sur nos serveurs.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CGV PAGE -->
+<div id="page-cgv" class="page">
+  <div class="tool-page">
+    <div class="container">
+      <div class="tool-breadcrumb">
+        <button onclick="showPage('landing')">Accueil</button>
+        <span>›</span>
+        <span style="color:rgba(255,255,255,.7)">CGV & CGU</span>
+      </div>
+      <h2 class="tool-page-title">📋 Conditions Générales de Vente & d'Utilisation</h2>
+      <div style="max-width:800px;padding-bottom:60px;color:rgba(255,255,255,.7);line-height:1.8;display:flex;flex-direction:column;gap:24px">
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">1. Objet</h3>
+          <p style="font-size:.88rem">TransportPro est une plateforme SaaS permettant aux chauffeurs et sous-traitants de trouver des sociétés de transport en France et en Belgique. Les présentes CGV régissent l'utilisation de la plateforme et les conditions d'abonnement.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">2. Abonnements et tarifs</h3>
+          <p style="font-size:.88rem">TransportPro propose trois formules d'abonnement mensuel : Starter (9,99€/mois), Pro (29,99€/mois) et Entreprise (79,99€/mois). Les prix sont indiqués en euros TTC. Le paiement est prélevé mensuellement via Stripe.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">3. Droit de rétractation et annulation</h3>
+          <p style="font-size:.88rem">Vous pouvez annuler votre abonnement à tout moment depuis votre espace "Mon compte". L'annulation prend effet à la fin de la période de facturation en cours. Conformément à l'article L221-28 du Code de la consommation, le droit de rétractation de 14 jours s'applique sauf si le service a déjà été utilisé.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">4. Propriété intellectuelle</h3>
+          <p style="font-size:.88rem">L'ensemble des contenus présents sur TransportPro (textes, images, logos, code) sont protégés par le droit d'auteur. Toute reproduction sans autorisation est interdite.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">5. Responsabilité</h3>
+          <p style="font-size:.88rem">TransportPro utilise les données de Google Places. Bien que nous fassions de notre mieux pour fournir des informations exactes, nous ne garantissons pas l'exactitude ou l'exhaustivité des données affichées. TransportPro ne saurait être tenu responsable des décisions prises sur la base des informations fournies.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">6. Contact</h3>
+          <p style="font-size:.88rem">Pour toute question concernant ces CGV, contactez-nous à <a href="mailto:contact.transportpro0@gmail.com" style="color:var(--blue)">contact.transportpro0@gmail.com</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MENTIONS LÉGALES PAGE -->
+<div id="page-mentions" class="page">
+  <div class="tool-page">
+    <div class="container">
+      <div class="tool-breadcrumb">
+        <button onclick="showPage('landing')">Accueil</button>
+        <span>›</span>
+        <span style="color:rgba(255,255,255,.7)">Mentions légales</span>
+      </div>
+      <h2 class="tool-page-title">⚖️ Mentions Légales</h2>
+      <div style="max-width:800px;padding-bottom:60px;display:flex;flex-direction:column;gap:16px">
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">Éditeur du site</h3>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.7)">TransportPro<br/>Numéro BCE : BE0766.738.280<br/>Email : <a href="mailto:contact.transportpro0@gmail.com" style="color:var(--blue)">contact.transportpro0@gmail.com</a><br/>Site web : www.transportpro.pro</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">Hébergement</h3>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.7)">Vercel Inc.<br/>440 N Barranca Ave #4133<br/>Covina, CA 91723, USA<br/>vercel.com</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">Données personnelles</h3>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.7)">Les données collectées (email, prénom, nom) sont utilisées uniquement pour la gestion de votre compte et l'envoi de communications liées à votre abonnement. Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ces droits, contactez-nous à <a href="mailto:contact.transportpro0@gmail.com" style="color:var(--blue)">contact.transportpro0@gmail.com</a></p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">Cookies</h3>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.7)">Ce site utilise des cookies fonctionnels nécessaires au bon fonctionnement de la plateforme (authentification, préférences). Aucun cookie publicitaire n'est utilisé.</p>
+        </div>
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--white)">Paiements</h3>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.7)">Les paiements sont traités par Stripe Inc. TransportPro ne stocke aucune donnée bancaire sur ses serveurs.</p>
+        </div>
       </div>
     </div>
   </div>
