@@ -333,6 +333,18 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
 <div class="bg-fixed"><div class="bg-grid"></div><div class="bg-orb1"></div><div class="bg-orb2"></div></div>
 
 <!-- NAV -->
+
+
+<!-- WELCOME POPUP -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-modal">
+    <div class="welcome-emoji">🎉</div>
+    <div class="welcome-title" id="welcomeTitle">Bienvenue sur TransportPro !</div>
+    <div class="welcome-sub" id="welcomeSub"></div>
+    <div class="welcome-features" id="welcomeFeatures"></div>
+    
+  </div>
+</div>
 <nav class="nav">
   <div class="nav-inner">
     <div class="nav-logo" onclick="showPage('landing')">
@@ -563,7 +575,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© 2025 TransportPro — Tous droits réservés</p>
+        <p>© 2026 TransportPro — Tous droits réservés</p>
         <p>🇫🇷 France · 🇧🇪 Belgique · Paiement sécurisé 🔒 Stripe</p>
       </div>
     </div>
@@ -752,21 +764,30 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
       <div style="max-width:760px;padding-bottom:60px;display:flex;flex-direction:column;gap:20px">
         
         <div class="testi-card">
-          <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:14px;color:var(--white)">Notre histoire</h3>
+          <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:14px;color:var(--white)">Qui sommes-nous ?</h3>
           <p style="font-size:.95rem;color:rgba(255,255,255,.7);line-height:1.8;">
-            TransportPro est né d'un constat simple : de nombreux chauffeurs et sous-traitants dans le secteur du transport galèrent à trouver des contrats et des sociétés avec lesquelles collaborer. En parallèle, beaucoup de sociétés de transport peinent à trouver des sous-traitants fiables.
+            TransportPro est une plateforme spécialisée dans la mise en relation entre chauffeurs indépendants, sous-traitants et sociétés de transport en France et en Belgique.
           </p>
           <br/>
           <p style="font-size:.95rem;color:rgba(255,255,255,.7);line-height:1.8;">
-            En tant que développeur passionné par la résolution de problèmes concrets, j'ai créé TransportPro pour combler ce manque — une plateforme simple, efficace et moderne qui connecte chauffeurs, sous-traitants et sociétés de transport en France et en Belgique.
+            Face à un secteur du transport où trouver des contrats et des partenaires fiables reste un vrai défi, TransportPro a été conçu pour simplifier et accélérer ces connexions — grâce à des données en temps réel, des outils de simulation financière et une interface pensée pour les professionnels de la route.
           </p>
         </div>
 
         <div class="testi-card">
           <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:14px;color:var(--white)">Notre mission</h3>
           <p style="font-size:.95rem;color:rgba(255,255,255,.7);line-height:1.8;">
-            Permettre à chaque chauffeur indépendant de trouver facilement des opportunités de collaboration, et à chaque société de transport de trouver rapidement des sous-traitants qualifiés — le tout en quelques clics.
+            Offrir à chaque professionnel du transport — chauffeur, sous-traitant ou dirigeant — les outils nécessaires pour développer son activité, trouver des opportunités et prendre les meilleures décisions financières. Le tout en quelques clics, sans perte de temps.
           </p>
+        </div>
+
+        <div class="testi-card">
+          <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:14px;color:var(--white)">Nos valeurs</h3>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-size:1.2rem">⚡</span><div><strong style="color:var(--white)">Simplicité</strong><p style="font-size:.88rem;color:rgba(255,255,255,.6);margin-top:2px">Une interface claire, sans friction, pensée pour les gens qui travaillent sur le terrain.</p></div></div>
+            <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-size:1.2rem">🎯</span><div><strong style="color:var(--white)">Précision</strong><p style="font-size:.88rem;color:rgba(255,255,255,.6);margin-top:2px">Des données Google Places en temps réel et des simulateurs financiers fiables.</p></div></div>
+            <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-size:1.2rem">🤝</span><div><strong style="color:var(--white)">Confiance</strong><p style="font-size:.88rem;color:rgba(255,255,255,.6);margin-top:2px">Une plateforme transparente, sécurisée, sans engagement et sans mauvaise surprise.</p></div></div>
+          </div>
         </div>
 
         <div class="testi-card">
@@ -955,6 +976,48 @@ function scrollToPricing() {
   setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior:'smooth' }), 100);
 }
 
+
+// ══ WELCOME POPUP ════════════════════════
+function showWelcomePopup(hasPro) {
+  const overlay = document.getElementById('welcomeOverlay');
+  const features = document.getElementById('welcomeFeatures');
+  const title = document.getElementById('welcomeTitle');
+  const sub = document.getElementById('welcomeSub');
+  const btn = document.getElementById('welcomeBtn');
+
+  if (hasPro) {
+    title.textContent = '🎉 Bienvenue sur TransportPro Pro !';
+    sub.textContent = '';
+    features.innerHTML = `
+      <div class="welcome-feature"><span class="welcome-feature-icon">🔍</span><div><strong>TransportFinder</strong> — Recherches illimitées</div></div>
+      <div class="welcome-feature"><span class="welcome-feature-icon">💰</span><div><strong>Simulateur de revenus</strong> — France & Belgique</div></div>
+      <div class="welcome-feature"><span class="welcome-feature-icon">📊</span><div><strong>Simulateur de charges</strong> — CDI, CDD, intérim</div></div>
+    `;
+    btn.textContent = 'C\'est parti ! →';
+  } else {
+    title.textContent = '🎉 Bienvenue sur TransportPro Starter !';
+    sub.textContent = '';
+    features.innerHTML = `
+      <div class="welcome-feature"><span class="welcome-feature-icon">🔍</span><div><strong>TransportFinder</strong> — 3 recherches par jour</div></div>
+      <div class="welcome-feature locked"><span class="welcome-feature-icon">💰</span><div><strong>Simulateur de revenus</strong> — 🔒 Plan Pro uniquement</div></div>
+      <div class="welcome-feature locked"><span class="welcome-feature-icon">📊</span><div><strong>Simulateur de charges</strong> — 🔒 Plan Pro uniquement</div></div>
+    `;
+    btn.textContent = 'C\'est parti ! →';
+  }
+
+  overlay.classList.add('show');
+}
+
+function closeWelcome() {
+  document.getElementById('welcomeOverlay').classList.remove('show');
+  showPage('finder');
+  document.querySelectorAll('.tool-tab-item').forEach(t => t.classList.remove('active'));
+  const tab = document.getElementById('tab-finder');
+  if (tab) tab.classList.add('active');
+}
+
+// Track if welcome was shown this session
+let _welcomeShown = false;
 // ══ MEMBERSTACK ══════════════════════
 const MS_PLANS = {
   starter: 'prc_starter-mw82039c',
@@ -1002,42 +1065,29 @@ async function accessTool(tool) {
     const member = await window.$memberstackDom.getCurrentMember();
     if (member && member.data) {
       const plans = member.data.planConnections || [];
-      console.log('Plans:', JSON.stringify(plans));
-
-      // Check if any plan is active (starter or higher)
       const hasAnyPlan = plans.length > 0;
-      
-      // Check for Pro/Entreprise
       const hasPro = plans.some(p => 
         p.priceId === 'prc_pro-ei8103c9' || 
         p.priceId === 'prc_entreprise-ib6k0elp' ||
         p.planId === 'pln_pro-888003rj' ||
         p.planId === 'pln_entreprise-237m0uzz'
       );
-
       if (tool === 'finder') {
-        if (hasAnyPlan) {
-          showPage('finder');
-        } else {
-          await window.$memberstackDom.openModal('SIGNUP');
-        }
+        if (hasAnyPlan) { showPage('finder'); }
+        else { await window.$memberstackDom.openModal('SIGNUP'); }
       } else if (tool === 'revenus' || tool === 'charges') {
-        if (hasPro) {
-          showPage(tool);
-        } else if (hasAnyPlan) {
-          showToast('⚠ Ces outils nécessitent le plan Pro (29,99€/mois)', true);
-          setTimeout(() => scrollToPricing(), 2000);
-        } else {
-          await window.$memberstackDom.openModal('SIGNUP');
-        }
+        if (hasPro) { showPage(tool); }
+        else if (hasAnyPlan) {
+          // Show upgrade modal nicely
+          showPage('landing');
+          setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior:'smooth' }), 100);
+          showToast('⚡ Ces outils nécessitent le plan Pro à 29,99€/mois', false);
+        } else { await window.$memberstackDom.openModal('SIGNUP'); }
       }
     } else {
       await window.$memberstackDom.openModal('SIGNUP');
     }
-  } catch(e) {
-    console.log('MS error:', e);
-    showPage(tool);
-  }
+  } catch(e) { showPage(tool); }
 }
 
 
@@ -1227,22 +1277,43 @@ function showToast(msg,err=false){const t=document.getElementById('toast');t.tex
 if(searchCount>=3)document.getElementById('limitBanner').style.display='flex';
 
 // ══ AUTO RELOAD ON LOGIN/LOGOUT ══════
-// Check every second if auth state changed
 let _msState = 'unknown';
 
 async function _checkAuthState() {
   try {
     const m = await window.$memberstackDom.getCurrentMember();
-    const state = (m && m.data) ? 'logged_in' : 'logged_out';
+    const plans = (m && m.data) ? (m.data.planConnections || []) : [];
+    const hasPlan = plans.length > 0;
+    const state = (m && m.data) ? (m.data.id || 'logged_in') : 'logged_out';
+    
     if (_msState !== 'unknown' && _msState !== state) {
-      window.location.reload();
-      return;
+      if (state !== 'logged_out') {
+        // Just logged in
+        await checkMember();
+        if (hasPlan && !_welcomeShown) {
+          const hasPro = plans.some(p => p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp');
+          _welcomeShown = true;
+          showWelcomePopup(hasPro);
+        } else {
+          showPage('finder');
+        }
+      } else {
+        window.location.reload();
+      }
     }
+    
+    // Also show welcome after fresh payment (URL contains fromCheckout)
+    if (!_welcomeShown && window.location.search.includes('fromCheckout') && m && m.data && hasPlan) {
+      const hasPro = plans.some(p => p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp');
+      _welcomeShown = true;
+      await checkMember();
+      showWelcomePopup(hasPro);
+    }
+    
     _msState = state;
   } catch(e) {}
 }
 
-// Start checking immediately and every second
 window.addEventListener('load', function() {
   setTimeout(_checkAuthState, 500);
   setInterval(_checkAuthState, 1000);
