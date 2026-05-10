@@ -1031,13 +1031,17 @@ async function msSignup(e, planId) {
   try {
     const member = await window.$memberstackDom.getCurrentMember();
     if (member && member.data) {
+      // Already logged in - go to checkout for this plan
       await window.$memberstackDom.purchasePlansWithCheckout({ priceId: planId });
     } else {
-      await window.$memberstackDom.openModal('SIGNUP', { planId: planId });
+      // Not logged in - signup WITH plan so payment is required
+      await window.$memberstackDom.openModal('SIGNUP', { 
+        priceId: planId,
+        planId: planId
+      });
     }
   } catch(err) {
     console.log('MS error:', err);
-    showToast('Redirection vers le paiement...', false);
   }
 }
 
@@ -1303,14 +1307,20 @@ async function _checkAuthState() {
     
     if (_msState !== 'unknown' && _msState !== state) {
       if (state !== 'logged_out') {
-        // Just logged in
+        // Just logged in - check if has active plan
         await checkMember();
-        if (hasPlan && !_welcomeShown) {
-          const hasPro = plans.some(p => p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp');
+        const hasActivePlan = plans.some(p => p.status === 'ACTIVE');
+        if (hasActivePlan && !_welcomeShown) {
+          const hasPro = plans.some(p => 
+            (p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp') && p.status === 'ACTIVE'
+          );
           _welcomeShown = true;
           showWelcomePopup(hasPro);
-        } else {
-          showPage('finder');
+          autoCloseWelcome();
+        } else if (!hasActivePlan) {
+          // Logged in but no plan - show pricing
+          showToast('⚠ Choisissez un plan pour accéder à la plateforme', true);
+          setTimeout(() => scrollToPricing(), 1500);
         }
       } else {
         window.location.reload();
