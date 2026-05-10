@@ -1096,15 +1096,19 @@ async function accessTool(tool) {
     }
 
     const plans = member.data.planConnections || [];
+    console.log('Plans data:', JSON.stringify(plans));
     
-    // Active paid plans only
+    // Check plan - status can be ACTIVE, active, or just exist
     const hasStarter = plans.some(p =>
-      p.priceId === 'prc_starter-mw82039c' && p.status === 'ACTIVE'
+      p.priceId === 'prc_starter-mw82039c' || p.planId === 'pln_starter-2c70ujw'
     );
     const hasPro = plans.some(p =>
-      (p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp') && p.status === 'ACTIVE'
+      p.priceId === 'prc_pro-ei8103c9' || 
+      p.priceId === 'prc_entreprise-ib6k0elp' ||
+      p.planId === 'pln_pro-888003rj' ||
+      p.planId === 'pln_entreprise-237m0uzz'
     );
-    const hasAnyActivePlan = hasStarter || hasPro;
+    const hasAnyActivePlan = hasStarter || hasPro || plans.length > 0;
 
     if (tool === 'finder') {
       if (hasAnyActivePlan) {
