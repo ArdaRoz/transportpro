@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.memberstack.com https://js.stripe.com https://hcaptcha.com https://*.hcaptcha.com https://maps.googleapis.com https://places.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.anthropic.com;">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TransportPro — La plateforme des chauffeurs indépendants</title>
 <meta name="description" content="Trouvez des sociétés de transport, calculez vos revenus et simulez vos charges. L'outil indispensable du chauffeur indépendant en France et Belgique."/>
@@ -513,24 +514,25 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
   <section class="testimonials">
     <div class="container">
       <div class="section-header">
-        <div class="section-tag">Ils nous font confiance</div>
-        <h2 class="section-title">Ce que disent nos utilisateurs</h2>
+        <div class="section-tag">Pourquoi TransportPro</div>
+        <h2 class="section-title">Ce qui nous différencie</h2>
+        <p class="section-sub">Une plateforme pensée pour les professionnels du transport en France et en Belgique.</p>
       </div>
       <div class="testi-grid">
-        <div class="testi-card">
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-text">"J'ai trouvé 3 nouvelles sociétés partenaires en une semaine. Le simulateur de revenus m'a aidé à négocier mes tarifs."</p>
-          <div class="testi-author"><div class="testi-avatar">K</div><div><div class="testi-name">Karim B.</div><div class="testi-role">Chauffeur livreur · Bruxelles</div></div></div>
+        <div class="testi-card" style="text-align:center;padding:32px">
+          <div style="font-size:2.5rem;margin-bottom:16px">⚡</div>
+          <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:8px">Données en temps réel</h3>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.5)">Toutes les informations proviennent directement de Google Places — toujours à jour, toujours fiables.</p>
         </div>
-        <div class="testi-card">
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-text">"Le simulateur de charges m'a évité des mauvaises surprises avec les cotisations. Je recommande à tous les sous-traitants."</p>
-          <div class="testi-author"><div class="testi-avatar">M</div><div><div class="testi-name">Mohamed T.</div><div class="testi-role">Sous-traitant transport · Lyon</div></div></div>
+        <div class="testi-card" style="text-align:center;padding:32px">
+          <div style="font-size:2.5rem;margin-bottom:16px">🎯</div>
+          <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:8px">Ciblé transport</h3>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.5)">Contrairement aux annuaires généraux, TransportPro est 100% dédié au secteur du transport routier.</p>
         </div>
-        <div class="testi-card">
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-text">"Interface claire, données à jour. Je l'utilise chaque semaine pour trouver de nouvelles missions près de Paris."</p>
-          <div class="testi-author"><div class="testi-avatar">S</div><div><div class="testi-name">Sophie L.</div><div class="testi-role">Chauffeure indépendante · Paris</div></div></div>
+        <div class="testi-card" style="text-align:center;padding:32px">
+          <div style="font-size:2.5rem;margin-bottom:16px">💶</div>
+          <h3 style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:8px">Outils financiers inclus</h3>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.5)">Simulez vos revenus et charges avant de signer — prenez les meilleures décisions pour votre activité.</p>
         </div>
       </div>
     </div>
@@ -1026,19 +1028,38 @@ const MS_PLANS = {
   entreprise: 'prc_entreprise-ib6k0elp'
 };
 
-async function msSignup(e, planId) {
+async function msSignup(e, priceId) {
   e.preventDefault();
   try {
-    const member = await window.$memberstackDom.getCurrentMember();
-    if (member && member.data) {
-      // Already logged in - go to checkout for this plan
-      await window.$memberstackDom.purchasePlansWithCheckout({ priceId: planId });
+    const { data: member } = await window.$memberstackDom.getCurrentMember();
+    
+    if (member) {
+      // Connecté → checkout direct avec priceId
+      await window.$memberstackDom.purchasePlansWithCheckout({ priceId: priceId });
     } else {
-      // Not logged in - signup WITH plan so payment is required
-      await window.$memberstackDom.openModal('SIGNUP', { 
-        priceId: planId,
-        planId: planId
-      });
+      // Non connecté → signup avec plan attaché (planId = priceId selon doc Memberstack)
+      window.$memberstackDom.openModal('SIGNUP', { planId: priceId })
+        .then(({ data }) => {
+          window.$memberstackDom.hideModal();
+          setTimeout(async () => {
+            await checkMember();
+            const m = await window.$memberstackDom.getCurrentMember();
+            if (m && m.data) {
+              const plans = m.data.planConnections || [];
+              const hasActivePlan = plans.some(p => p.status === 'ACTIVE');
+              if (hasActivePlan) {
+                const hasPro = plans.some(p => 
+                  p.priceId === 'prc_pro-ei8103c9' || 
+                  p.priceId === 'prc_entreprise-ib6k0elp'
+                );
+                _welcomeShown = true;
+                showWelcomePopup(hasPro);
+                autoCloseWelcome();
+              }
+            }
+          }, 1500);
+        })
+        .catch(err => console.log('Signup error:', err));
     }
   } catch(err) {
     console.log('MS error:', err);
@@ -1069,7 +1090,8 @@ async function accessTool(tool) {
   try {
     const member = await window.$memberstackDom.getCurrentMember();
     if (!member || !member.data) {
-      await window.$memberstackDom.openModal('SIGNUP');
+      // Not logged in - redirect to pricing page
+      scrollToPricing();
       return;
     }
 
