@@ -318,7 +318,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
 
 @media(max-width:1024px){.tools-grid{grid-template-columns:1fr 1fr}.how-steps{grid-template-columns:1fr 1fr}.pricing-grid{grid-template-columns:1fr}.testi-grid{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){
-  .nav-links{display:none}.nav-burger{display:none}
+  .nav-links{display:none}.nav-burger{display:none}.nav-cta{display:none!important}
   .tools-grid{grid-template-columns:1fr}.how-steps{grid-template-columns:1fr}
   .testi-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr}
   .footer-bottom{flex-direction:column;text-align:center}
@@ -1074,11 +1074,22 @@ async function checkMember() {
       const plans = member.data.planConnections || [];
       const hasPro = plans.some(p => p.planId === MS_PLANS.pro || p.planId === MS_PLANS.entreprise);
       const hasStarter = plans.some(p => p.planId === MS_PLANS.starter);
+
+      // Bouton desktop "Voir les offres" → "Mon compte ▾"
       const navCta = document.querySelector('.nav-cta');
       if (navCta) {
         navCta.textContent = 'Mon compte ▾';
         navCta.onclick = () => window.$memberstackDom.openModal('PROFILE');
       }
+
+      // Bouton "Se connecter" → "Mon compte ▾" (visible sur mobile)
+      const navLogin = document.getElementById('navLogin');
+      if (navLogin) {
+        navLogin.textContent = 'Mon compte ▾';
+        navLogin.onclick = () => window.$memberstackDom.openModal('PROFILE');
+        navLogin.style.display = 'inline-flex';
+      }
+
       if (hasPro || hasStarter) {
         showPage('finder');
       }
