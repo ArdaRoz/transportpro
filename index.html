@@ -1011,9 +1011,10 @@ function showWelcomePopup(hasPro) {
 function closeWelcome() {
   document.getElementById('welcomeOverlay').classList.remove('show');
   showPage('finder');
-  document.querySelectorAll('.tool-tab-item').forEach(t => t.classList.remove('active'));
-  const tab = document.getElementById('tab-finder');
-  if (tab) tab.classList.add('active');
+}
+
+function autoCloseWelcome() {
+  setTimeout(() => closeWelcome(), 4000);
 }
 
 // Track if welcome was shown this session
@@ -1063,31 +1064,45 @@ window.addEventListener('load', checkMember);
 async function accessTool(tool) {
   try {
     const member = await window.$memberstackDom.getCurrentMember();
-    if (member && member.data) {
-      const plans = member.data.planConnections || [];
-      const hasAnyPlan = plans.length > 0;
-      const hasPro = plans.some(p => 
-        p.priceId === 'prc_pro-ei8103c9' || 
-        p.priceId === 'prc_entreprise-ib6k0elp' ||
-        p.planId === 'pln_pro-888003rj' ||
-        p.planId === 'pln_entreprise-237m0uzz'
-      );
-      if (tool === 'finder') {
-        if (hasAnyPlan) { showPage('finder'); }
-        else { await window.$memberstackDom.openModal('SIGNUP'); }
-      } else if (tool === 'revenus' || tool === 'charges') {
-        if (hasPro) { showPage(tool); }
-        else if (hasAnyPlan) {
-          // Show upgrade modal nicely
-          showPage('landing');
-          setTimeout(() => document.getElementById('pricing')?.scrollIntoView({ behavior:'smooth' }), 100);
-          showToast('⚡ Ces outils nécessitent le plan Pro à 29,99€/mois', false);
-        } else { await window.$memberstackDom.openModal('SIGNUP'); }
-      }
-    } else {
+    if (!member || !member.data) {
       await window.$memberstackDom.openModal('SIGNUP');
+      return;
     }
-  } catch(e) { showPage(tool); }
+
+    const plans = member.data.planConnections || [];
+    
+    // Active paid plans only
+    const hasStarter = plans.some(p =>
+      p.priceId === 'prc_starter-mw82039c' && p.status === 'ACTIVE'
+    );
+    const hasPro = plans.some(p =>
+      (p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp') && p.status === 'ACTIVE'
+    );
+    const hasAnyActivePlan = hasStarter || hasPro;
+
+    if (tool === 'finder') {
+      if (hasAnyActivePlan) {
+        showPage('finder');
+      } else {
+        // No active plan - send to pricing
+        showToast('⚠ Un abonnement est requis pour accéder à cet outil', true);
+        setTimeout(() => scrollToPricing(), 1500);
+      }
+    } else if (tool === 'revenus' || tool === 'charges') {
+      if (hasPro) {
+        showPage(tool);
+      } else if (hasStarter) {
+        showToast('⚡ Ces outils nécessitent le plan Pro à 29,99€/mois', true);
+        setTimeout(() => scrollToPricing(), 1500);
+      } else {
+        showToast('⚠ Un abonnement est requis', true);
+        setTimeout(() => scrollToPricing(), 1500);
+      }
+    }
+  } catch(e) {
+    console.log('accessTool error:', e);
+    await window.$memberstackDom.openModal('SIGNUP');
+  }
 }
 
 
@@ -1308,6 +1323,7 @@ async function _checkAuthState() {
       _welcomeShown = true;
       await checkMember();
       showWelcomePopup(hasPro);
+      autoCloseWelcome();
     }
     
     _msState = state;
