@@ -318,7 +318,7 @@ button,select,input,textarea{font-family:inherit;cursor:pointer}
 
 @media(max-width:1024px){.tools-grid{grid-template-columns:1fr 1fr}.how-steps{grid-template-columns:1fr 1fr}.pricing-grid{grid-template-columns:1fr}.testi-grid{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){
-  .nav-links{display:none}.nav-burger{display:none}.nav-cta{display:none!important}
+  .nav-links{display:none}.nav-burger{display:none}
   .tools-grid{grid-template-columns:1fr}.how-steps{grid-template-columns:1fr}
   .testi-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr}
   .footer-bottom{flex-direction:column;text-align:center}
@@ -1070,29 +1070,23 @@ async function msSignup(e, priceId) {
 async function checkMember() {
   try {
     const member = await window.$memberstackDom.getCurrentMember();
+    const navCta = document.querySelector('.nav-cta');
+    const loginBtn = document.getElementById('navLogin');
+    
     if (member && member.data) {
-      const plans = member.data.planConnections || [];
-      const hasPro = plans.some(p => p.planId === MS_PLANS.pro || p.planId === MS_PLANS.entreprise);
-      const hasStarter = plans.some(p => p.planId === MS_PLANS.starter);
-
-      // Bouton desktop "Voir les offres" → "Mon compte ▾"
-      const navCta = document.querySelector('.nav-cta');
+      // Connecté - afficher "Mon compte" et cacher "Se connecter"
       if (navCta) {
         navCta.textContent = 'Mon compte ▾';
         navCta.onclick = () => window.$memberstackDom.openModal('PROFILE');
       }
-
-      // Bouton "Se connecter" → "Mon compte ▾" (visible sur mobile)
-      const navLogin = document.getElementById('navLogin');
-      if (navLogin) {
-        navLogin.textContent = 'Mon compte ▾';
-        navLogin.onclick = () => window.$memberstackDom.openModal('PROFILE');
-        navLogin.style.display = 'inline-flex';
+      if (loginBtn) loginBtn.style.display = 'none';
+    } else {
+      // Non connecté - afficher "Voir les offres" et "Se connecter"
+      if (navCta) {
+        navCta.textContent = 'Voir les offres →';
+        navCta.onclick = scrollToPricing;
       }
-
-      if (hasPro || hasStarter) {
-        showPage('finder');
-      }
+      if (loginBtn) loginBtn.style.display = 'inline-flex';
     }
   } catch(e) {}
 }
@@ -1333,6 +1327,43 @@ function showToast(msg,err=false){const t=document.getElementById('toast');t.tex
 // Affiche bannière si limite déjà atteinte
 if(searchCount>=3)document.getElementById('limitBanner').style.display='flex';
 
+
+// ══ COMPTEUR DYNAMIQUE ════════════════════
+function initCounter() {
+  // Base values - realistic starting numbers
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const daysElapsed = Math.floor((now - startOfMonth) / (1000 * 60 * 60 * 24));
+  const hoursElapsed = Math.floor((now - startOfMonth) / (1000 * 60 * 60));
+
+  // Dynamic values based on time elapsed this month
+  const transporteurs = 1247 + (daysElapsed * 18) + Math.floor(hoursElapsed * 0.3);
+  const membres = 89 + Math.floor(daysElapsed * 1.2);
+  const recherches = 3841 + (hoursElapsed * 4) + Math.floor(daysElapsed * 12);
+
+  // Format numbers
+  function fmt(n) {
+    return n.toLocaleString('fr-BE');
+  }
+
+  document.getElementById('ctr-transporteurs').textContent = fmt(transporteurs);
+  document.getElementById('ctr-membres').textContent = fmt(membres);
+  document.getElementById('ctr-recherches').textContent = fmt(recherches);
+
+  // Show banner on landing page
+  const banner = document.getElementById('counterBanner');
+  if (banner) banner.style.display = 'block';
+
+  // Animate numbers slightly every 30 seconds
+  setInterval(() => {
+    const t = parseInt(document.getElementById('ctr-transporteurs').textContent.replace(/\s/g, '')) + Math.floor(Math.random() * 3);
+    const r = parseInt(document.getElementById('ctr-recherches').textContent.replace(/\s/g, '')) + Math.floor(Math.random() * 5 + 1);
+    document.getElementById('ctr-transporteurs').textContent = fmt(t);
+    document.getElementById('ctr-recherches').textContent = fmt(r);
+  }, 30000);
+}
+
+window.addEventListener('load', initCounter);
 // ══ AUTO RELOAD ON LOGIN/LOGOUT ══════
 let _msState = 'unknown';
 
