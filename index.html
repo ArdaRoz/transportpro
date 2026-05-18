@@ -544,11 +544,7 @@ button,select,input{font-family:inherit;cursor:pointer}
       <div class="counter-dot"></div>
       <strong id="ctr-membres">89</strong> membres actifs
     </div>
-    <div class="counter-sep"></div>
-    <div class="counter-item">
-      <div class="counter-dot"></div>
-      <strong id="ctr-recherches">3 841</strong> recherches effectuées
-    </div>
+
   </div>
 </div>
 
@@ -1710,7 +1706,7 @@ function initCounter() {
   // Dynamic values based on time elapsed this month
   const transporteurs = 1247 + (daysElapsed * 18) + Math.floor(hoursElapsed * 0.3);
   const membres = 89 + Math.floor(daysElapsed * 1.2);
-  const recherches = 3841 + (hoursElapsed * 4) + Math.floor(daysElapsed * 12);
+
 
   // Format numbers
   function fmt(n) {
@@ -1719,7 +1715,7 @@ function initCounter() {
 
   document.getElementById('ctr-transporteurs').textContent = fmt(transporteurs);
   document.getElementById('ctr-membres').textContent = fmt(membres);
-  document.getElementById('ctr-recherches').textContent = fmt(recherches);
+
 
   // Show banner on landing page
   const banner = document.getElementById('counterBanner');
