@@ -794,7 +794,7 @@ button,select,input{font-family:inherit;cursor:pointer}
       <div class="search-bar">
         <div class="search-field">
           <span>📍</span>
-          <input type="text" id="tfCityInput" placeholder="Ville (ex: Bruxelles, Paris, Lyon…)" autocomplete="off"/>
+          <input type="text" id="tfCityInput" placeholder="Ville (ex: Bruxelles, Paris, Lyon…)" autocomplete="off" maxlength="100"/>
         </div>
         <div class="search-field" style="flex:0;min-width:130px">
           <span>📏</span>
@@ -1158,12 +1158,60 @@ const GKEY = 'AIzaSyC0BBE03Ae7E-cFAVS55VGGs20NZhHzj3E';
 
 // ══ LIMITE RECHERCHES (3/jour) ════════
 const TODAY = new Date().toDateString();
+// ══ SECURITY & RATE LIMITING ══════════════
+const TODAY = new Date().toDateString();
 let searchCount = parseInt(localStorage.getItem('tf_count_' + TODAY) || '0');
+let lastSearchTime = parseInt(localStorage.getItem('tf_last_search') || '0');
+let userHasPro = false;
+let isSearching = false; // Prevent concurrent requests
+
+async function checkUserPlan() {
+  try {
+    const member = await window.$memberstackDom.getCurrentMember();
+    if (member && member.data) {
+      const plans = member.data.planConnections || [];
+      userHasPro = plans.some(p =>
+        p.priceId === 'prc_pro-ei8103c9' ||
+        p.priceId === 'prc_entreprise-ib6k0elp' ||
+        p.planId === 'pln_pro-888003rj' ||
+        p.planId === 'pln_entreprise-237m0uzz'
+      );
+    }
+  } catch(e) {}
+}
+
+function canSearch() {
+  const now = Date.now();
+  // Anti-spam: minimum 3 seconds between searches
+  if (now - lastSearchTime < 3000) {
+    showToast('⚠ Attendez quelques secondes avant de relancer une recherche', true);
+    return false;
+  }
+  // Concurrent request protection
+  if (isSearching) {
+    showToast('⚠ Recherche en cours, veuillez patienter...', true);
+    return false;
+  }
+  // Daily limit for Starter
+  if (!userHasPro && searchCount >= 3) {
+    document.getElementById('limitBanner').style.display = 'flex';
+    showToast('⚠ Limite de 3 recherches atteinte ! Passez au Pro.', true);
+    return false;
+  }
+  return true;
+}
+
 function incrementSearch() {
+  lastSearchTime = Date.now();
+  localStorage.setItem('tf_last_search', lastSearchTime);
+  if (userHasPro) return;
   searchCount++;
   localStorage.setItem('tf_count_' + TODAY, searchCount);
   if (searchCount >= 3) document.getElementById('limitBanner').style.display = 'flex';
 }
+
+// Check plan on load
+window.addEventListener('load', checkUserPlan);
 
 // ══ NAVIGATION ════════════════════════
 function showPage(id) {
@@ -1353,21 +1401,25 @@ let tfResults = [], tfLat = null, tfLng = null, tfLabel = '';
 function km(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180;const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2;return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))*10)/10;}
 
 async function tfSearch() {
-  if (searchCount >= 3) {
-    document.getElementById('limitBanner').style.display = 'flex';
-    showToast('⚠ Limite de 3 recherches atteinte ! Passez au Pro.', true);
-    return;
-  }
+  if (!canSearch()) return;
   const city = document.getElementById('tfCityInput').value.trim();
   const radius = parseInt(document.getElementById('tfRadius').value);
   if (!city && tfLat === null) { showToast('⚠ Entrez une ville !', true); return; }
+  
+  // Sanitize input - remove special characters
+  const sanitizedCity = city.replace(/[<>"'&;]/g, '').trim().slice(0, 100);
+  if (!sanitizedCity && tfLat === null) { showToast('⚠ Ville invalide', true); return; }
+  isSearching = true;
+  const searchBtn = document.getElementById('tfSearchBtn');
+  if (searchBtn) { searchBtn.disabled = true; searchBtn.textContent = '⏳ Recherche...'; }
+  
   const res = document.getElementById('tfResults');
   res.style.display = 'block';
   document.getElementById('tfCards').innerHTML = `<div class="tf-loading"><div class="spinner"></div><p style="color:rgba(255,255,255,.5)">Connexion à Google Places…</p></div>`;
   res.scrollIntoView({ behavior:'smooth', block:'start' });
   try {
     if (city) {
-      const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(city)}&language=fr&key=${GKEY}`);
+      const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(sanitizedCity)}&language=fr&key=${GKEY}`);
       const d = await r.json();
       if (d.status !== 'OK') throw new Error(`Ville "${city}" introuvable`);
       tfLat = d.results[0].geometry.location.lat;
@@ -1396,10 +1448,16 @@ async function tfSearch() {
     incrementSearch();
     const filteredCount = filterResults(tfResults).length;
     document.getElementById('tfCount').innerHTML=`<span>${filteredCount}</span> société${filteredCount>1?'s':''} trouvée${filteredCount>1?'s':''} <span style="color:var(--gray-600,rgba(255,255,255,.3));font-size:.8rem;font-weight:400">(${tfResults.length} au total)</span>`;
-    document.getElementById('tfLoc').textContent=`près de ${tfLabel} · rayon ${radius/1000} km · ${3-searchCount} recherche${3-searchCount>1?'s':''} restante${3-searchCount>1?'s':''}`;
+    document.getElementById('tfLoc').textContent = userHasPro 
+      ? `près de ${tfLabel} · rayon ${radius/1000} km · recherches illimitées`
+      : `près de ${tfLabel} · rayon ${radius/1000} km · ${3-searchCount} recherche${3-searchCount>1?'s':''} restante${3-searchCount>1?'s':''}`;
     tfRenderCards();
   } catch(err) {
     document.getElementById('tfCards').innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">⚠️</div><h3>Erreur</h3><p>${err.message}</p></div>`;
+  } finally {
+    isSearching = false;
+    const searchBtn = document.getElementById('tfSearchBtn');
+    if (searchBtn) { searchBtn.disabled = false; searchBtn.textContent = '🔍 Rechercher'; }
   }
 }
 
@@ -1692,7 +1750,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 function showToast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'var(--red)':'var(--green)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
 
 // Affiche bannière si limite déjà atteinte
-if(searchCount>=3)document.getElementById('limitBanner').style.display='flex';
+if(!userHasPro && searchCount>=3)document.getElementById('limitBanner').style.display='flex';
 
 
 // ══ COMPTEUR DYNAMIQUE ════════════════════
