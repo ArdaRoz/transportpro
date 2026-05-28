@@ -12,6 +12,7 @@
 <meta property="og:url" content="https://transportpro.pro"/>
 <meta property="og:type" content="website"/>
 <link rel="canonical" href="https://transportpro.pro"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231A6BF5'/%3E%3Crect x='8' y='8' width='16' height='16' rx='3' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E"/>
 
 <!-- Structured Data -->
 <script type="application/ld+json">
@@ -1154,11 +1155,8 @@ const STRIPE = {
   pro:        'https://buy.stripe.com/3cI3cwaFTdXa5y82HCeUU1i',
   entreprise: 'https://buy.stripe.com/dRm28scO1bP28Kk81WeUU1j',
 };
-const GKEY = 'AIzaSyC0BBE03Ae7E-cFAVS55VGGs20NZhHzj3E';
-
-// ══ LIMITE RECHERCHES (3/jour) ════════
-const TODAY = new Date().toDateString();
 // ══ SECURITY & RATE LIMITING ══════════════
+const TODAY = new Date().toDateString();
 let searchCount = parseInt(localStorage.getItem('tf_count_' + TODAY) || '0');
 let lastSearchTime = parseInt(localStorage.getItem('tf_last_search') || '0');
 let userHasPro = false;
@@ -1169,8 +1167,12 @@ async function checkUserPlan() {
     const member = await window.$memberstackDom.getCurrentMember();
     if (member && member.data) {
       const plans = member.data.planConnections || [];
-      const access = checkPlanAccess(plans);
-      userHasPro = access.hasPro;
+      userHasPro = plans.some(p =>
+        p.priceId === 'prc_pro-ei8103c9' ||
+        p.priceId === 'prc_entreprise-ib6k0elp' ||
+        p.planId === 'pln_pro-888003rj' ||
+        p.planId === 'pln_entreprise-237m0uzz'
+      );
     }
   } catch(e) {}
 }
@@ -1269,22 +1271,16 @@ const MS_PLANS = {
   entreprise: 'prc_entreprise-ib6k0elp'
 };
 
-const STRIPE_LINKS = {
-  'prc_starter-mw82039c': 'https://buy.stripe.com/cNi28s7tHg5i1hS1DyeUU1h',
-  'prc_pro-ei8103c9': 'https://buy.stripe.com/3cI3cwaFTdXa5y82HCeUU1i',
-  'prc_entreprise-ib6k0elp': 'https://buy.stripe.com/dRm28scO1bP28Kk81WeUU1j'
-};
-
 async function msSignup(e, priceId) {
   e.preventDefault();
   try {
     const { data: member } = await window.$memberstackDom.getCurrentMember();
     
     if (member) {
-      // Connecté → aller directement sur Stripe
-      window.location.href = STRIPE_LINKS[priceId] || STRIPE_LINKS['prc_starter-mw82039c'];
+      // Connecté → checkout direct avec priceId
+      await window.$memberstackDom.purchasePlansWithCheckout({ priceId: priceId });
     } else {
-      // Non connecté → signup avec plan attaché
+      // Non connecté → signup avec plan attaché (planId = priceId selon doc Memberstack)
       window.$memberstackDom.openModal('SIGNUP', { planId: priceId })
         .then(({ data }) => {
           window.$memberstackDom.hideModal();
@@ -1320,18 +1316,14 @@ async function checkMember() {
     const loginBtn = document.getElementById('navLogin');
     
     if (member && member.data) {
+      // Connecté - afficher "Mon compte" et cacher "Se connecter"
       if (navCta) {
         navCta.textContent = 'Mon compte ▾';
         navCta.onclick = () => window.$memberstackDom.openModal('PROFILE');
       }
       if (loginBtn) loginBtn.style.display = 'none';
-      
-      // Update Pro search limit
-      const plans = member.data.planConnections || [];
-      const access = checkPlanAccess(plans);
-      userHasPro = access.hasPro;
-      
     } else {
+      // Non connecté - afficher "Voir les offres" et "Se connecter"
       if (navCta) {
         navCta.textContent = 'Voir les offres →';
         navCta.onclick = scrollToPricing;
@@ -1342,33 +1334,6 @@ async function checkMember() {
 }
 window.addEventListener('load', checkMember);
 
-
-// ══ VÉRIFICATION CENTRALE DES PLANS ══════════
-// Une seule fonction utilisée partout pour éviter les incohérences
-function checkPlanAccess(plans) {
-  if (!plans || plans.length === 0) return { hasAny: false, hasStarter: false, hasPro: false };
-  
-  const PRO_PRICE_IDS = ['prc_pro-ei8103c9', 'prc_entreprise-ib6k0elp'];
-  const PRO_PLAN_IDS = ['pln_pro-888003rj', 'pln_entreprise-237m0uzz'];
-  const STARTER_PRICE_IDS = ['prc_starter-mw82039c'];
-  const STARTER_PLAN_IDS = ['pln_starter-2c70ujw'];
-
-  const hasPro = plans.some(p => 
-    PRO_PRICE_IDS.includes(p.priceId) || 
-    PRO_PLAN_IDS.includes(p.planId)
-  );
-  
-  const hasStarter = plans.some(p => 
-    STARTER_PRICE_IDS.includes(p.priceId) || 
-    STARTER_PLAN_IDS.includes(p.planId)
-  );
-
-  return {
-    hasAny: hasPro || hasStarter || plans.length > 0,
-    hasStarter: hasStarter || (!hasPro && plans.length > 0),
-    hasPro: hasPro
-  };
-}
 async function accessTool(tool) {
   try {
     const member = await window.$memberstackDom.getCurrentMember();
@@ -1451,7 +1416,7 @@ async function tfSearch() {
   res.scrollIntoView({ behavior:'smooth', block:'start' });
   try {
     if (city) {
-      const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(sanitizedCity)}&language=fr&key=${GKEY}`);
+      const r = await fetch(`/api/places?endpoint=geocode&address=${encodeURIComponent(sanitizedCity)}&language=fr`);
       const d = await r.json();
       if (d.status !== 'OK') throw new Error(`Ville "${city}" introuvable`);
       tfLat = d.results[0].geometry.location.lat;
@@ -1462,10 +1427,10 @@ async function tfSearch() {
     const seen = new Map();
     for (const q of queries) {
       try {
-        const r = await fetch('https://places.googleapis.com/v1/places:searchText', {
+        const r = await fetch('/api/places', {
           method:'POST',
-          headers:{'Content-Type':'application/json','X-Goog-Api-Key':GKEY,'X-Goog-FieldMask':'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.currentOpeningHours,places.photos,places.location,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri'},
-          body:JSON.stringify({textQuery:q,locationBias:{circle:{center:{latitude:tfLat,longitude:tfLng},radius}},languageCode:'fr',maxResultCount:20})
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({endpoint:'searchText',textQuery:q,locationBias:{circle:{center:{latitude:tfLat,longitude:tfLng},radius}},languageCode:'fr',maxResultCount:20})
         });
         const d = await r.json();
         (d.places||[]).forEach(p=>{if(!seen.has(p.id))seen.set(p.id,p);});
@@ -1600,14 +1565,13 @@ async function tfSearchWithFilter() {
     const seen = new Map();
     for (const q of queries) {
       try {
-        const r = await fetch('https://places.googleapis.com/v1/places:searchText', {
+        const r = await fetch('/api/places', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'X-Goog-Api-Key': GKEY,
-            'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.currentOpeningHours,places.photos,places.location,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
+            endpoint: 'searchText',
             textQuery: q,
             locationBias: { circle: { center: { latitude: tfLat, longitude: tfLng }, radius } },
             languageCode: 'fr',
@@ -1656,7 +1620,7 @@ function filterResults(results) {
     .filter(c => c.reviews >= 5)        // Min 5 avis
     .filter(c => isValidTransport(c));   // Pas de points relais / non-transport
 }
-function tfPhotoUrl(name){return name?`https://places.googleapis.com/v1/${name}/media?maxWidthPx=80&key=${GKEY}`:null;}
+function tfPhotoUrl(name){return name?`/api/places?endpoint=photo&name=${encodeURIComponent(name)}&maxWidthPx=80`:null;}
 function tfRenderCards(){
   const grid=document.getElementById('tfCards');
   if(!tfResults.length){grid.innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">🔍</div><h3>Aucun résultat</h3><p>Essayez un rayon plus grand</p></div>`;return;}
@@ -1835,13 +1799,16 @@ async function _checkAuthState() {
       if (state !== 'logged_out') {
         // Just logged in - check if has active plan
         await checkMember();
-        const access = checkPlanAccess(plans);
-        userHasPro = access.hasPro;
-        if (access.hasAny && !_welcomeShown) {
+        const hasActivePlan = plans.some(p => p.status === 'ACTIVE');
+        if (hasActivePlan && !_welcomeShown) {
+          const hasPro = plans.some(p => 
+            (p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp') && p.status === 'ACTIVE'
+          );
           _welcomeShown = true;
-          showWelcomePopup(access.hasPro);
+          showWelcomePopup(hasPro);
           autoCloseWelcome();
-        } else if (!access.hasAny) {
+        } else if (!hasActivePlan) {
+          // Logged in but no plan - show pricing
           showToast('⚠ Choisissez un plan pour accéder à la plateforme', true);
           setTimeout(() => scrollToPricing(), 1500);
         }
@@ -1851,12 +1818,11 @@ async function _checkAuthState() {
     }
     
     // Also show welcome after fresh payment (URL contains fromCheckout)
-    const accessCheck = checkPlanAccess(plans);
-    userHasPro = accessCheck.hasPro;
-    if (!_welcomeShown && window.location.search.includes('fromCheckout') && m && m.data && accessCheck.hasAny) {
+    if (!_welcomeShown && window.location.search.includes('fromCheckout') && m && m.data && hasPlan) {
+      const hasPro = plans.some(p => p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp');
       _welcomeShown = true;
       await checkMember();
-      showWelcomePopup(accessCheck.hasPro);
+      showWelcomePopup(hasPro);
       autoCloseWelcome();
     }
     
