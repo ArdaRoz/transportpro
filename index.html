@@ -387,7 +387,7 @@ button,select,input{font-family:inherit;cursor:pointer}
 .welcome-feature{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);font-size:.85rem;color:var(--gray-400)}
 .welcome-feature.locked{opacity:.35}
 .welcome-feature-icon{font-size:1rem;flex-shrink:0}
-.welcome-btn{display:inline-flex}
+.welcome-btn{display:none}
 
 /* COUNTER BANNER */
 .counter-banner{background:rgba(255,92,0,.04);border-bottom:1px solid rgba(255,92,0,.12);padding:10px 0}
@@ -402,7 +402,7 @@ button,select,input{font-family:inherit;cursor:pointer}
 @media(max-width:1024px){.tools-grid{grid-template-columns:1fr 1fr}.how-steps{grid-template-columns:1fr 1fr}.pricing-grid{grid-template-columns:1fr}.testi-grid{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){
   /* NAV */
-  .nav-links{display:none;flex-direction:column;position:absolute;top:60px;left:0;right:0;background:rgba(10,10,10,.97);padding:12px 16px;gap:4px;border-bottom:1px solid var(--border);z-index:199}.nav-burger{display:flex}
+  .nav-links{display:none}.nav-burger{display:none}
   .nav-inner{gap:6px;padding:0 16px}
   .nav-logo{font-size:.9rem}
   .nav-logo-icon{width:24px;height:24px;font-size:.85rem}
@@ -506,14 +506,13 @@ button,select,input{font-family:inherit;cursor:pointer}
 
 
 <!-- WELCOME POPUP -->
-<div class="welcome-overlay" id="welcomeOverlay" onclick="if(event.target===this)closeWelcome()">
-  <div class="welcome-modal" style="position:relative">
-    <button onclick="closeWelcome()" style="position:absolute;top:12px;right:12px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--gray-400);font-size:.8rem;cursor:pointer">✕</button>
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-modal">
     <div class="welcome-emoji">🎉</div>
     <div class="welcome-title" id="welcomeTitle">Bienvenue sur TransportPro !</div>
     <div class="welcome-sub" id="welcomeSub"></div>
     <div class="welcome-features" id="welcomeFeatures"></div>
-    <button id="welcomeBtn" class="btn btn-primary btn-full" onclick="closeWelcome()" style="margin-top:8px">C'est parti ! →</button>
+    
   </div>
 </div>
 <nav class="nav">
@@ -734,8 +733,8 @@ button,select,input{font-family:inherit;cursor:pointer}
       <h2>Prêt à développer votre activité ?</h2>
       <p>Rejoignez les chauffeurs qui utilisent TransportPro pour trouver des missions et optimiser leurs revenus.</p>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-primary btn-lg" onclick="msSignup(event,'prc_pro-ei8103c9')">Commencer Pro — 29,99€/mois →</button>
-        <button class="btn btn-outline btn-lg" onclick="msSignup(event,'prc_starter-mw82039c')">Plan Starter — 9,99€/mois</button>
+        <button class="btn btn-primary btn-lg" onclick="goToStripe('pro')">Commencer Pro — 29,99€/mois →</button>
+        <button class="btn btn-outline btn-lg" onclick="goToStripe('starter')">Plan Starter — 9,99€/mois</button>
       </div>
     </div>
   </section>
@@ -1155,8 +1154,11 @@ const STRIPE = {
   pro:        'https://buy.stripe.com/3cI3cwaFTdXa5y82HCeUU1i',
   entreprise: 'https://buy.stripe.com/dRm28scO1bP28Kk81WeUU1j',
 };
-// ══ SECURITY & RATE LIMITING ══════════════
+const GKEY = 'AIzaSyC0BBE03Ae7E-cFAVS55VGGs20NZhHzj3E';
+
+// ══ LIMITE RECHERCHES (3/jour) ════════
 const TODAY = new Date().toDateString();
+// ══ SECURITY & RATE LIMITING ══════════════
 let searchCount = parseInt(localStorage.getItem('tf_count_' + TODAY) || '0');
 let lastSearchTime = parseInt(localStorage.getItem('tf_last_search') || '0');
 let userHasPro = false;
@@ -1167,12 +1169,8 @@ async function checkUserPlan() {
     const member = await window.$memberstackDom.getCurrentMember();
     if (member && member.data) {
       const plans = member.data.planConnections || [];
-      userHasPro = plans.some(p =>
-        p.priceId === 'prc_pro-ei8103c9' ||
-        p.priceId === 'prc_entreprise-ib6k0elp' ||
-        p.planId === 'pln_pro-888003rj' ||
-        p.planId === 'pln_entreprise-237m0uzz'
-      );
+      const access = checkPlanAccess(plans);
+      userHasPro = access.hasPro;
     }
   } catch(e) {}
 }
@@ -1215,8 +1213,6 @@ function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   window.scrollTo(0, 0);
-  document.body.style.overflow = '';
-  closeNavMenu && closeNavMenu();
 }
 function scrollToPricing() {
   showPage('landing');
@@ -1273,16 +1269,22 @@ const MS_PLANS = {
   entreprise: 'prc_entreprise-ib6k0elp'
 };
 
+const STRIPE_LINKS = {
+  'prc_starter-mw82039c': 'https://buy.stripe.com/cNi28s7tHg5i1hS1DyeUU1h',
+  'prc_pro-ei8103c9': 'https://buy.stripe.com/3cI3cwaFTdXa5y82HCeUU1i',
+  'prc_entreprise-ib6k0elp': 'https://buy.stripe.com/dRm28scO1bP28Kk81WeUU1j'
+};
+
 async function msSignup(e, priceId) {
   e.preventDefault();
   try {
     const { data: member } = await window.$memberstackDom.getCurrentMember();
     
     if (member) {
-      // Connecté → checkout direct avec priceId
-      await window.$memberstackDom.purchasePlansWithCheckout({ priceId: priceId });
+      // Connecté → aller directement sur Stripe
+      window.location.href = STRIPE_LINKS[priceId] || STRIPE_LINKS['prc_starter-mw82039c'];
     } else {
-      // Non connecté → signup avec plan attaché (planId = priceId selon doc Memberstack)
+      // Non connecté → signup avec plan attaché
       window.$memberstackDom.openModal('SIGNUP', { planId: priceId })
         .then(({ data }) => {
           window.$memberstackDom.hideModal();
@@ -1318,14 +1320,18 @@ async function checkMember() {
     const loginBtn = document.getElementById('navLogin');
     
     if (member && member.data) {
-      // Connecté - afficher "Mon compte" et cacher "Se connecter"
       if (navCta) {
         navCta.textContent = 'Mon compte ▾';
         navCta.onclick = () => window.$memberstackDom.openModal('PROFILE');
       }
       if (loginBtn) loginBtn.style.display = 'none';
+      
+      // Update Pro search limit
+      const plans = member.data.planConnections || [];
+      const access = checkPlanAccess(plans);
+      userHasPro = access.hasPro;
+      
     } else {
-      // Non connecté - afficher "Voir les offres" et "Se connecter"
       if (navCta) {
         navCta.textContent = 'Voir les offres →';
         navCta.onclick = scrollToPricing;
@@ -1336,6 +1342,33 @@ async function checkMember() {
 }
 window.addEventListener('load', checkMember);
 
+
+// ══ VÉRIFICATION CENTRALE DES PLANS ══════════
+// Une seule fonction utilisée partout pour éviter les incohérences
+function checkPlanAccess(plans) {
+  if (!plans || plans.length === 0) return { hasAny: false, hasStarter: false, hasPro: false };
+  
+  const PRO_PRICE_IDS = ['prc_pro-ei8103c9', 'prc_entreprise-ib6k0elp'];
+  const PRO_PLAN_IDS = ['pln_pro-888003rj', 'pln_entreprise-237m0uzz'];
+  const STARTER_PRICE_IDS = ['prc_starter-mw82039c'];
+  const STARTER_PLAN_IDS = ['pln_starter-2c70ujw'];
+
+  const hasPro = plans.some(p => 
+    PRO_PRICE_IDS.includes(p.priceId) || 
+    PRO_PLAN_IDS.includes(p.planId)
+  );
+  
+  const hasStarter = plans.some(p => 
+    STARTER_PRICE_IDS.includes(p.priceId) || 
+    STARTER_PLAN_IDS.includes(p.planId)
+  );
+
+  return {
+    hasAny: hasPro || hasStarter || plans.length > 0,
+    hasStarter: hasStarter || (!hasPro && plans.length > 0),
+    hasPro: hasPro
+  };
+}
 async function accessTool(tool) {
   try {
     const member = await window.$memberstackDom.getCurrentMember();
@@ -1394,9 +1427,6 @@ document.getElementById('navBurger').addEventListener('click', () => {
   const l = document.querySelector('.nav-links');
   if (l) l.style.display = l.style.display === 'flex' ? 'none' : 'flex';
 });
-// Close mobile menu when any nav link is clicked
-function closeNavMenu(){const l=document.querySelector('.nav-links');if(l&&window.innerWidth<=768)l.style.display='none';}
-document.querySelectorAll('.nav-link,.nav-cta,.nav-login').forEach(el=>el.addEventListener('click',closeNavMenu));
 
 // ══ TRANSPORT FINDER ══════════════════
 let tfResults = [], tfLat = null, tfLng = null, tfLabel = '';
@@ -1421,7 +1451,7 @@ async function tfSearch() {
   res.scrollIntoView({ behavior:'smooth', block:'start' });
   try {
     if (city) {
-      const r = await fetch(`/api/places?endpoint=geocode&address=${encodeURIComponent(sanitizedCity)}&language=fr`);
+      const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(sanitizedCity)}&language=fr&key=${GKEY}`);
       const d = await r.json();
       if (d.status !== 'OK') throw new Error(`Ville "${city}" introuvable`);
       tfLat = d.results[0].geometry.location.lat;
@@ -1432,10 +1462,10 @@ async function tfSearch() {
     const seen = new Map();
     for (const q of queries) {
       try {
-        const r = await fetch('/api/places', {
+        const r = await fetch('https://places.googleapis.com/v1/places:searchText', {
           method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({endpoint:'searchText',textQuery:q,locationBias:{circle:{center:{latitude:tfLat,longitude:tfLng},radius}},languageCode:'fr',maxResultCount:20})
+          headers:{'Content-Type':'application/json','X-Goog-Api-Key':GKEY,'X-Goog-FieldMask':'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.currentOpeningHours,places.photos,places.location,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri'},
+          body:JSON.stringify({textQuery:q,locationBias:{circle:{center:{latitude:tfLat,longitude:tfLng},radius}},languageCode:'fr',maxResultCount:20})
         });
         const d = await r.json();
         (d.places||[]).forEach(p=>{if(!seen.has(p.id))seen.set(p.id,p);});
@@ -1570,13 +1600,14 @@ async function tfSearchWithFilter() {
     const seen = new Map();
     for (const q of queries) {
       try {
-        const r = await fetch('/api/places', {
+        const r = await fetch('https://places.googleapis.com/v1/places:searchText', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': GKEY,
+            'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.currentOpeningHours,places.photos,places.location,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri'
           },
           body: JSON.stringify({
-            endpoint: 'searchText',
             textQuery: q,
             locationBias: { circle: { center: { latitude: tfLat, longitude: tfLng }, radius } },
             languageCode: 'fr',
@@ -1625,7 +1656,7 @@ function filterResults(results) {
     .filter(c => c.reviews >= 5)        // Min 5 avis
     .filter(c => isValidTransport(c));   // Pas de points relais / non-transport
 }
-function tfPhotoUrl(name){return name?`/api/places?endpoint=photo&name=${encodeURIComponent(name)}&maxWidthPx=80`:null;}
+function tfPhotoUrl(name){return name?`https://places.googleapis.com/v1/${name}/media?maxWidthPx=80&key=${GKEY}`:null;}
 function tfRenderCards(){
   const grid=document.getElementById('tfCards');
   if(!tfResults.length){grid.innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">🔍</div><h3>Aucun résultat</h3><p>Essayez un rayon plus grand</p></div>`;return;}
@@ -1647,7 +1678,7 @@ function tfRenderCards(){
       <div class="tf-addr">📍 ${c.address}</div>
       <div class="tf-stats"><div>${stars}</div><span class="tf-dist">${c.distance} km</span></div>
       <div class="tf-actions">
-        ${c.phone?`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();window.location.href='tel:${c.phone.replace(/\s/g,'')}'">📞 Appeler</button>`:`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();tfOpenModal(${i})">📞 Contacter</button>`}
+        ${c.phone?`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();window.location.href='tel:${c.phone.replace(/\s/g,'')}'"">📞 Appeler</button>`:`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();tfOpenModal(${i})">📞 Contacter</button>`}
         <button class="tf-btn tf-btn-detail" onclick="event.stopPropagation();tfOpenModal(${i})">Détails →</button>
       </div>
     </div>`;
@@ -1669,7 +1700,7 @@ function tfOpenModal(idx){
     <div class="modal-info-row"><span class="modal-info-icon">◎</span><div class="modal-info-content"><span class="modal-info-label">Distance</span><span class="modal-info-val" style="color:#5b8aff">${c.distance} km</span></div></div>
   </div>`;
   let btns='';
-  if(c.phone)btns+=`<button class="mbtn mbtn-call" onclick="window.location.href='tel:${c.phone.replace(/\s/g,'')}'">📞 Appeler</button>`;
+  if(c.phone)btns+=`<button class="mbtn mbtn-call" onclick="window.location.href='tel:${c.phone.replace(/\s/g,'')}'"">📞 Appeler</button>`;
   if(c.website)btns+=`<button class="mbtn mbtn-web" onclick="window.open('${c.website}','_blank')">🌐 Site web</button>`;
   if(c.gmaps)btns+=`<button class="mbtn mbtn-gmaps" onclick="window.open('${c.gmaps}','_blank')">🗺 Maps</button>`;
   btns+=`<button class="mbtn mbtn-close" onclick="closeModal()">Fermer</button>`;
@@ -1804,16 +1835,13 @@ async function _checkAuthState() {
       if (state !== 'logged_out') {
         // Just logged in - check if has active plan
         await checkMember();
-        const hasActivePlan = plans.some(p => p.status === 'ACTIVE');
-        if (hasActivePlan && !_welcomeShown) {
-          const hasPro = plans.some(p => 
-            (p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp') && p.status === 'ACTIVE'
-          );
+        const access = checkPlanAccess(plans);
+        userHasPro = access.hasPro;
+        if (access.hasAny && !_welcomeShown) {
           _welcomeShown = true;
-          showWelcomePopup(hasPro);
+          showWelcomePopup(access.hasPro);
           autoCloseWelcome();
-        } else if (!hasActivePlan) {
-          // Logged in but no plan - show pricing
+        } else if (!access.hasAny) {
           showToast('⚠ Choisissez un plan pour accéder à la plateforme', true);
           setTimeout(() => scrollToPricing(), 1500);
         }
@@ -1823,11 +1851,12 @@ async function _checkAuthState() {
     }
     
     // Also show welcome after fresh payment (URL contains fromCheckout)
-    if (!_welcomeShown && window.location.search.includes('fromCheckout') && m && m.data && hasPlan) {
-      const hasPro = plans.some(p => p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp');
+    const accessCheck = checkPlanAccess(plans);
+    userHasPro = accessCheck.hasPro;
+    if (!_welcomeShown && window.location.search.includes('fromCheckout') && m && m.data && accessCheck.hasAny) {
       _welcomeShown = true;
       await checkMember();
-      showWelcomePopup(hasPro);
+      showWelcomePopup(accessCheck.hasPro);
       autoCloseWelcome();
     }
     
