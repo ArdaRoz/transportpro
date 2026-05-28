@@ -1154,10 +1154,6 @@ const STRIPE = {
   pro:        'https://buy.stripe.com/3cI3cwaFTdXa5y82HCeUU1i',
   entreprise: 'https://buy.stripe.com/dRm28scO1bP28Kk81WeUU1j',
 };
-const GKEY = 'AIzaSyC0BBE03Ae7E-cFAVS55VGGs20NZhHzj3E';
-
-// ══ LIMITE RECHERCHES (3/jour) ════════
-const TODAY = new Date().toDateString();
 // ══ SECURITY & RATE LIMITING ══════════════
 const TODAY = new Date().toDateString();
 let searchCount = parseInt(localStorage.getItem('tf_count_' + TODAY) || '0');
@@ -1419,7 +1415,7 @@ async function tfSearch() {
   res.scrollIntoView({ behavior:'smooth', block:'start' });
   try {
     if (city) {
-      const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(sanitizedCity)}&language=fr&key=${GKEY}`);
+      const r = await fetch(`/api/places?endpoint=geocode&address=${encodeURIComponent(sanitizedCity)}&language=fr`);
       const d = await r.json();
       if (d.status !== 'OK') throw new Error(`Ville "${city}" introuvable`);
       tfLat = d.results[0].geometry.location.lat;
@@ -1430,10 +1426,10 @@ async function tfSearch() {
     const seen = new Map();
     for (const q of queries) {
       try {
-        const r = await fetch('https://places.googleapis.com/v1/places:searchText', {
+        const r = await fetch('/api/places', {
           method:'POST',
-          headers:{'Content-Type':'application/json','X-Goog-Api-Key':GKEY,'X-Goog-FieldMask':'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.currentOpeningHours,places.photos,places.location,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri'},
-          body:JSON.stringify({textQuery:q,locationBias:{circle:{center:{latitude:tfLat,longitude:tfLng},radius}},languageCode:'fr',maxResultCount:20})
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({endpoint:'searchText',textQuery:q,locationBias:{circle:{center:{latitude:tfLat,longitude:tfLng},radius}},languageCode:'fr',maxResultCount:20})
         });
         const d = await r.json();
         (d.places||[]).forEach(p=>{if(!seen.has(p.id))seen.set(p.id,p);});
@@ -1568,14 +1564,13 @@ async function tfSearchWithFilter() {
     const seen = new Map();
     for (const q of queries) {
       try {
-        const r = await fetch('https://places.googleapis.com/v1/places:searchText', {
+        const r = await fetch('/api/places', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'X-Goog-Api-Key': GKEY,
-            'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.currentOpeningHours,places.photos,places.location,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
+            endpoint: 'searchText',
             textQuery: q,
             locationBias: { circle: { center: { latitude: tfLat, longitude: tfLng }, radius } },
             languageCode: 'fr',
@@ -1624,7 +1619,7 @@ function filterResults(results) {
     .filter(c => c.reviews >= 5)        // Min 5 avis
     .filter(c => isValidTransport(c));   // Pas de points relais / non-transport
 }
-function tfPhotoUrl(name){return name?`https://places.googleapis.com/v1/${name}/media?maxWidthPx=80&key=${GKEY}`:null;}
+function tfPhotoUrl(name){return name?`/api/places?endpoint=photo&name=${encodeURIComponent(name)}&maxWidthPx=80`:null;}
 function tfRenderCards(){
   const grid=document.getElementById('tfCards');
   if(!tfResults.length){grid.innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">🔍</div><h3>Aucun résultat</h3><p>Essayez un rayon plus grand</p></div>`;return;}
