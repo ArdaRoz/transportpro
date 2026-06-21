@@ -12,7 +12,6 @@
 <meta property="og:url" content="https://transportpro.pro"/>
 <meta property="og:type" content="website"/>
 <link rel="canonical" href="https://transportpro.pro"/>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231A6BF5'/%3E%3Crect x='8' y='8' width='16' height='16' rx='3' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E"/>
 
 <!-- Structured Data -->
 <script type="application/ld+json">
@@ -44,6 +43,7 @@
   --white:#FFFFFF;--gray-100:#F5F5F5;--gray-200:#E5E5E5;
   --gray-400:#888888;--gray-600:#555555;--gray-800:#2A2A2A;
   --green:#00C896;--red:#FF4444;--border:rgba(255,255,255,.08);
+  --blue:#5b8aff;--amber:#FFB020;
   --font-h:'Inter',sans-serif;--font-b:'Inter',sans-serif;--font-mono:'JetBrains Mono',monospace;
   --r:8px;--r-lg:12px;--r-xl:16px;--t:.15s ease;
   --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 32px rgba(0,0,0,.4);
@@ -80,7 +80,7 @@ button,select,input{font-family:inherit;cursor:pointer}
 .nav-login:hover{color:var(--white);border-color:rgba(255,255,255,.2)}
 .nav-cta{padding:7px 16px;background:var(--orange);color:var(--white);border:none;border-radius:var(--r);font-size:.85rem;font-weight:600;transition:var(--t);letter-spacing:-.01em}
 .nav-cta:hover{background:var(--orange-lt);transform:translateY(-1px);box-shadow:0 4px 16px var(--orange-glow)}
-.nav-burger{display:none;flex-direction:column;gap:4px;background:none;border:none;padding:6px}
+.nav-burger{display:none;flex-direction:column;gap:4px;background:none;border:none;padding:10px}
 .nav-burger span{display:block;width:20px;height:1.5px;background:var(--white);border-radius:2px}
 
 /* UTILS */
@@ -211,7 +211,7 @@ button,select,input{font-family:inherit;cursor:pointer}
 .search-bar{display:flex;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-xl);padding:8px;flex-wrap:wrap;margin-bottom:8px;transition:var(--t)}
 .search-bar:focus-within{border-color:rgba(255,92,0,.4);box-shadow:0 0 0 3px rgba(255,92,0,.08)}
 .search-field{display:flex;align-items:center;gap:8px;flex:1;min-width:160px;background:var(--bg3);border-radius:var(--r);padding:0 14px;border:1px solid var(--border)}
-.search-field input,.search-field select{flex:1;background:none;border:none;color:var(--white);font-size:.9rem;padding:11px 0;outline:none;min-width:0;font-family:inherit}
+.search-field input,.search-field select{flex:1;background:none;border:none;color:var(--white);font-size:1rem;padding:11px 0;outline:none;min-width:0;font-family:inherit}
 .search-field input::placeholder{color:var(--gray-600)}
 .search-field select{appearance:none}
 .search-field select option{background:var(--bg2)}
@@ -318,7 +318,7 @@ button,select,input{font-family:inherit;cursor:pointer}
 .sal-row{display:flex;gap:12px;flex-wrap:wrap}
 .sal-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px}
 .sal-field label{font-size:.78rem;color:var(--gray-400);font-weight:500}
-.sal-field select,.sal-field input{width:100%;padding:8px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--white);font-size:.875rem;font-family:inherit;outline:none;transition:border-color .15s}
+.sal-field select,.sal-field input{width:100%;padding:8px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--white);font-size:1rem;font-family:inherit;outline:none;transition:border-color .15s}
 .sal-field select:focus,.sal-field input:focus{border-color:rgba(255,92,0,.4)}
 .sal-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1rem}
 .sal-metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem}
@@ -388,7 +388,7 @@ button,select,input{font-family:inherit;cursor:pointer}
 .welcome-feature{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);font-size:.85rem;color:var(--gray-400)}
 .welcome-feature.locked{opacity:.35}
 .welcome-feature-icon{font-size:1rem;flex-shrink:0}
-.welcome-btn{display:none}
+.welcome-btn{display:inline-flex}
 
 /* COUNTER BANNER */
 .counter-banner{background:rgba(255,92,0,.04);border-bottom:1px solid rgba(255,92,0,.12);padding:10px 0}
@@ -403,7 +403,7 @@ button,select,input{font-family:inherit;cursor:pointer}
 @media(max-width:1024px){.tools-grid{grid-template-columns:1fr 1fr}.how-steps{grid-template-columns:1fr 1fr}.pricing-grid{grid-template-columns:1fr}.testi-grid{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){
   /* NAV */
-  .nav-links{display:none}.nav-burger{display:none}
+  .nav-links{display:none;flex-direction:column;position:absolute;top:60px;left:0;right:0;background:rgba(10,10,10,.97);padding:12px 16px;gap:4px;border-bottom:1px solid var(--border);z-index:199}.nav-burger{display:flex}
   .nav-inner{gap:6px;padding:0 16px}
   .nav-logo{font-size:.9rem}
   .nav-logo-icon{width:24px;height:24px;font-size:.85rem}
@@ -507,13 +507,14 @@ button,select,input{font-family:inherit;cursor:pointer}
 
 
 <!-- WELCOME POPUP -->
-<div class="welcome-overlay" id="welcomeOverlay">
-  <div class="welcome-modal">
+<div class="welcome-overlay" id="welcomeOverlay" onclick="if(event.target===this)closeWelcome()">
+  <div class="welcome-modal" style="position:relative">
+    <button onclick="closeWelcome()" style="position:absolute;top:12px;right:12px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--gray-400);font-size:.75rem;cursor:pointer">✕</button>
     <div class="welcome-emoji">🎉</div>
     <div class="welcome-title" id="welcomeTitle">Bienvenue sur TransportPro !</div>
     <div class="welcome-sub" id="welcomeSub"></div>
     <div class="welcome-features" id="welcomeFeatures"></div>
-    
+    <button id="welcomeBtn" class="btn btn-primary btn-full" onclick="closeWelcome()" style="margin-top:8px">C'est parti ! →</button>
   </div>
 </div>
 <nav class="nav">
@@ -734,8 +735,8 @@ button,select,input{font-family:inherit;cursor:pointer}
       <h2>Prêt à développer votre activité ?</h2>
       <p>Rejoignez les chauffeurs qui utilisent TransportPro pour trouver des missions et optimiser leurs revenus.</p>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-primary btn-lg" onclick="goToStripe('pro')">Commencer Pro — 29,99€/mois →</button>
-        <button class="btn btn-outline btn-lg" onclick="goToStripe('starter')">Plan Starter — 9,99€/mois</button>
+        <button class="btn btn-primary btn-lg" onclick="msSignup(event,'prc_pro-ei8103c9')">Commencer Pro — 29,99€/mois →</button>
+        <button class="btn btn-outline btn-lg" onclick="msSignup(event,'prc_starter-mw82039c')">Plan Starter — 9,99€/mois</button>
       </div>
     </div>
   </section>
@@ -1164,15 +1165,29 @@ let isSearching = false; // Prevent concurrent requests
 
 async function checkUserPlan() {
   try {
-    const member = await window.$memberstackDom.getCurrentMember();
+    let member = await window.$memberstackDom.getCurrentMember({ useCache: false });
+    let plans = (member && member.data) ? (member.data.planConnections || []) : [];
+
+    // Retry une fois si aucun plan trouvé — Memberstack peut ne pas avoir
+    // fini de synchroniser juste après une inscription/connexion récente
+    if (plans.length === 0 && member && member.data) {
+      await new Promise(r => setTimeout(r, 1200));
+      member = await window.$memberstackDom.getCurrentMember({ useCache: false });
+      plans = (member && member.data) ? (member.data.planConnections || []) : [];
+    }
+
     if (member && member.data) {
-      const plans = member.data.planConnections || [];
       userHasPro = plans.some(p =>
         p.priceId === 'prc_pro-ei8103c9' ||
         p.priceId === 'prc_entreprise-ib6k0elp' ||
         p.planId === 'pln_pro-888003rj' ||
         p.planId === 'pln_entreprise-237m0uzz'
       );
+      // Mettre à jour l'affichage du compteur si déjà rendu
+      if (userHasPro) {
+        const banner = document.getElementById('limitBanner');
+        if (banner) banner.style.display = 'none';
+      }
     }
   } catch(e) {}
 }
@@ -1215,6 +1230,8 @@ function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   window.scrollTo(0, 0);
+  document.body.style.overflow = '';
+  if(typeof closeNavMenu === 'function') closeNavMenu();
 }
 function scrollToPricing() {
   showPage('landing');
@@ -1336,14 +1353,23 @@ window.addEventListener('load', checkMember);
 
 async function accessTool(tool) {
   try {
-    const member = await window.$memberstackDom.getCurrentMember();
+    let member = await window.$memberstackDom.getCurrentMember({ useCache: false });
     if (!member || !member.data) {
       // Not logged in - redirect to pricing page
       scrollToPricing();
       return;
     }
 
-    const plans = member.data.planConnections || [];
+    let plans = member.data.planConnections || [];
+
+    // Si aucun plan détecté, on retente une fois après un court délai —
+    // Memberstack peut ne pas avoir fini de synchroniser juste après inscription/connexion
+    if (plans.length === 0) {
+      await new Promise(r => setTimeout(r, 1200));
+      member = await window.$memberstackDom.getCurrentMember({ useCache: false });
+      plans = (member && member.data) ? (member.data.planConnections || []) : [];
+    }
+
     console.log('Plans data:', JSON.stringify(plans));
     
     // Check plan - status can be ACTIVE, active, or just exist
@@ -1385,6 +1411,7 @@ async function accessTool(tool) {
 
 
 
+
 function goToStripe(plan) {
   window.open(STRIPE[plan], '_blank');
 }
@@ -1392,6 +1419,8 @@ document.getElementById('navBurger').addEventListener('click', () => {
   const l = document.querySelector('.nav-links');
   if (l) l.style.display = l.style.display === 'flex' ? 'none' : 'flex';
 });
+function closeNavMenu(){const l=document.querySelector('.nav-links');if(l&&window.innerWidth<=768)l.style.display='none';}
+document.querySelectorAll('.nav-link,.nav-cta,.nav-login').forEach(el=>el.addEventListener('click',closeNavMenu));
 
 // ══ TRANSPORT FINDER ══════════════════
 let tfResults = [], tfLat = null, tfLng = null, tfLabel = '';
@@ -1642,7 +1671,7 @@ function tfRenderCards(){
       <div class="tf-addr">📍 ${c.address}</div>
       <div class="tf-stats"><div>${stars}</div><span class="tf-dist">${c.distance} km</span></div>
       <div class="tf-actions">
-        ${c.phone?`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();window.location.href='tel:${c.phone.replace(/\s/g,'')}'"">📞 Appeler</button>`:`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();tfOpenModal(${i})">📞 Contacter</button>`}
+        ${c.phone?`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();window.location.href='tel:${c.phone.replace(/\s/g,'')}'">📞 Appeler</button>`:`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();tfOpenModal(${i})">📞 Contacter</button>`}
         <button class="tf-btn tf-btn-detail" onclick="event.stopPropagation();tfOpenModal(${i})">Détails →</button>
       </div>
     </div>`;
@@ -1664,7 +1693,7 @@ function tfOpenModal(idx){
     <div class="modal-info-row"><span class="modal-info-icon">◎</span><div class="modal-info-content"><span class="modal-info-label">Distance</span><span class="modal-info-val" style="color:#5b8aff">${c.distance} km</span></div></div>
   </div>`;
   let btns='';
-  if(c.phone)btns+=`<button class="mbtn mbtn-call" onclick="window.location.href='tel:${c.phone.replace(/\s/g,'')}'"">📞 Appeler</button>`;
+  if(c.phone)btns+=`<button class="mbtn mbtn-call" onclick="window.location.href='tel:${c.phone.replace(/\s/g,'')}'">📞 Appeler</button>`;
   if(c.website)btns+=`<button class="mbtn mbtn-web" onclick="window.open('${c.website}','_blank')">🌐 Site web</button>`;
   if(c.gmaps)btns+=`<button class="mbtn mbtn-gmaps" onclick="window.open('${c.gmaps}','_blank')">🗺 Maps</button>`;
   btns+=`<button class="mbtn mbtn-close" onclick="closeModal()">Fermer</button>`;
@@ -1778,9 +1807,7 @@ function initCounter() {
   // Animate numbers slightly every 30 seconds
   setInterval(() => {
     const t = parseInt(document.getElementById('ctr-transporteurs').textContent.replace(/\s/g, '')) + Math.floor(Math.random() * 3);
-    const r = parseInt(document.getElementById('ctr-recherches').textContent.replace(/\s/g, '')) + Math.floor(Math.random() * 5 + 1);
     document.getElementById('ctr-transporteurs').textContent = fmt(t);
-    document.getElementById('ctr-recherches').textContent = fmt(r);
   }, 30000);
 }
 
@@ -1790,16 +1817,24 @@ let _msState = 'unknown';
 
 async function _checkAuthState() {
   try {
-    const m = await window.$memberstackDom.getCurrentMember();
-    const plans = (m && m.data) ? (m.data.planConnections || []) : [];
-    const hasPlan = plans.length > 0;
+    let m = await window.$memberstackDom.getCurrentMember({ useCache: false });
+    let plans = (m && m.data) ? (m.data.planConnections || []) : [];
     const state = (m && m.data) ? (m.data.id || 'logged_in') : 'logged_out';
     
     if (_msState !== 'unknown' && _msState !== state) {
       if (state !== 'logged_out') {
         // Just logged in - check if has active plan
         await checkMember();
-        const hasActivePlan = plans.some(p => p.status === 'ACTIVE');
+
+        // Retry une fois si aucun plan trouvé juste après une connexion fraîche —
+        // Memberstack peut ne pas avoir fini de synchroniser les plans
+        if (plans.length === 0) {
+          await new Promise(r => setTimeout(r, 1200));
+          m = await window.$memberstackDom.getCurrentMember({ useCache: false });
+          plans = (m && m.data) ? (m.data.planConnections || []) : [];
+        }
+
+        const hasActivePlan = plans.some(p => p.status === 'ACTIVE') || plans.length > 0;
         if (hasActivePlan && !_welcomeShown) {
           const hasPro = plans.some(p => 
             (p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp') && p.status === 'ACTIVE'
