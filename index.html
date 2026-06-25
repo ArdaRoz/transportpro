@@ -1168,12 +1168,14 @@ async function checkUserPlan() {
     let member = await window.$memberstackDom.getCurrentMember({ useCache: false });
     let plans = (member && member.data) ? (member.data.planConnections || []) : [];
 
-    // Retry une fois si aucun plan trouvé — Memberstack peut ne pas avoir
+    // Retry jusqu'à 3 fois si aucun plan trouvé — Memberstack peut ne pas avoir
     // fini de synchroniser juste après une inscription/connexion récente
-    if (plans.length === 0 && member && member.data) {
-      await new Promise(r => setTimeout(r, 1200));
+    let attempts = 0;
+    while (plans.length === 0 && member && member.data && attempts < 3) {
+      await new Promise(r => setTimeout(r, 1500 * (attempts + 1)));
       member = await window.$memberstackDom.getCurrentMember({ useCache: false });
       plans = (member && member.data) ? (member.data.planConnections || []) : [];
+      attempts++;
     }
 
     if (member && member.data) {
@@ -1291,7 +1293,7 @@ const MS_PLANS = {
 async function msSignup(e, priceId) {
   e.preventDefault();
   try {
-    const { data: member } = await window.$memberstackDom.getCurrentMember();
+    const { data: member } = await window.$memberstackDom.getCurrentMember({ useCache: false });
     
     if (member) {
       // Connecté → checkout direct avec priceId
@@ -1303,19 +1305,28 @@ async function msSignup(e, priceId) {
           window.$memberstackDom.hideModal();
           setTimeout(async () => {
             await checkMember();
-            const m = await window.$memberstackDom.getCurrentMember();
-            if (m && m.data) {
-              const plans = m.data.planConnections || [];
-              const hasActivePlan = plans.some(p => p.status === 'ACTIVE');
-              if (hasActivePlan) {
-                const hasPro = plans.some(p => 
-                  p.priceId === 'prc_pro-ei8103c9' || 
-                  p.priceId === 'prc_entreprise-ib6k0elp'
-                );
-                _welcomeShown = true;
-                showWelcomePopup(hasPro);
-                autoCloseWelcome();
-              }
+            await checkUserPlan();
+            let m = await window.$memberstackDom.getCurrentMember({ useCache: false });
+            let plans = (m && m.data) ? (m.data.planConnections || []) : [];
+
+            // Retry jusqu'à 3 fois — le webhook Stripe → Memberstack peut prendre
+            // plusieurs secondes après un paiement frais
+            let attempts = 0;
+            while (plans.length === 0 && attempts < 3) {
+              await new Promise(r => setTimeout(r, 1500 * (attempts + 1)));
+              m = await window.$memberstackDom.getCurrentMember({ useCache: false });
+              plans = (m && m.data) ? (m.data.planConnections || []) : [];
+              attempts++;
+            }
+
+            if (plans.length > 0) {
+              const hasPro = plans.some(p => 
+                p.priceId === 'prc_pro-ei8103c9' || 
+                p.priceId === 'prc_entreprise-ib6k0elp'
+              );
+              _welcomeShown = true;
+              showWelcomePopup(hasPro);
+              autoCloseWelcome();
             }
           }, 1500);
         })
@@ -1362,12 +1373,14 @@ async function accessTool(tool) {
 
     let plans = member.data.planConnections || [];
 
-    // Si aucun plan détecté, on retente une fois après un court délai —
-    // Memberstack peut ne pas avoir fini de synchroniser juste après inscription/connexion
-    if (plans.length === 0) {
-      await new Promise(r => setTimeout(r, 1200));
+    // Si aucun plan détecté, on retente jusqu'à 3 fois avec des délais croissants —
+    // le webhook Stripe → Memberstack peut prendre plusieurs secondes à synchroniser
+    let attempts = 0;
+    while (plans.length === 0 && attempts < 3) {
+      await new Promise(r => setTimeout(r, 1500 * (attempts + 1))); // 1.5s, 3s, 4.5s
       member = await window.$memberstackDom.getCurrentMember({ useCache: false });
       plans = (member && member.data) ? (member.data.planConnections || []) : [];
+      attempts++;
     }
 
     console.log('Plans data:', JSON.stringify(plans));
@@ -1388,9 +1401,9 @@ async function accessTool(tool) {
       if (hasAnyActivePlan) {
         showPage('finder');
       } else {
-        // No active plan - send to pricing
-        showToast('⚠ Un abonnement est requis pour accéder à cet outil', true);
-        setTimeout(() => scrollToPricing(), 1500);
+        // No active plan - send to pricing (mais sans dire "vous n'avez pas payé" si ambigu)
+        showToast('⚠ Si vous êtes déjà abonné, contactez le support', true);
+        setTimeout(() => scrollToPricing(), 2000);
       }
     } else if (tool === 'revenus' || tool === 'charges') {
       if (hasPro) {
@@ -1399,7 +1412,7 @@ async function accessTool(tool) {
         showToast('⚡ Ces outils nécessitent le plan Pro à 29,99€/mois', true);
         setTimeout(() => scrollToPricing(), 1500);
       } else {
-        showToast('⚠ Un abonnement est requis', true);
+        showToast('⚠ Si vous êtes déjà abonné, contactez le support', true);
         setTimeout(() => scrollToPricing(), 1500);
       }
     }
@@ -1826,12 +1839,14 @@ async function _checkAuthState() {
         // Just logged in - check if has active plan
         await checkMember();
 
-        // Retry une fois si aucun plan trouvé juste après une connexion fraîche —
-        // Memberstack peut ne pas avoir fini de synchroniser les plans
-        if (plans.length === 0) {
-          await new Promise(r => setTimeout(r, 1200));
+        // Retry jusqu'à 3 fois si aucun plan trouvé juste après une connexion fraîche —
+        // le webhook Stripe → Memberstack peut prendre plusieurs secondes
+        let attempts = 0;
+        while (plans.length === 0 && attempts < 3) {
+          await new Promise(r => setTimeout(r, 1500 * (attempts + 1)));
           m = await window.$memberstackDom.getCurrentMember({ useCache: false });
           plans = (m && m.data) ? (m.data.planConnections || []) : [];
+          attempts++;
         }
 
         const hasActivePlan = plans.some(p => p.status === 'ACTIVE') || plans.length > 0;
