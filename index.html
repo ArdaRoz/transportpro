@@ -1162,6 +1162,7 @@ let searchCount = parseInt(localStorage.getItem('tf_count_' + TODAY) || '0');
 let lastSearchTime = parseInt(localStorage.getItem('tf_last_search') || '0');
 let userHasPro = false;
 let isSearching = false; // Prevent concurrent requests
+let planCheckReady = false; // Becomes true once checkUserPlan() finishes
 
 async function checkUserPlan() {
   try {
@@ -1189,13 +1190,22 @@ async function checkUserPlan() {
       if (userHasPro) {
         const banner = document.getElementById('limitBanner');
         if (banner) banner.style.display = 'none';
+        // Réinitialise le compteur si un Pro avait été comptabilisé par erreur
+        searchCount = 0;
+        localStorage.removeItem('tf_count_' + TODAY);
       }
     }
   } catch(e) {}
+  planCheckReady = true; // Autorise les recherches dans tous les cas
 }
 
 function canSearch() {
   const now = Date.now();
+  // Attendre que la vérification du plan soit terminée
+  if (!planCheckReady) {
+    showToast('⏳ Vérification de votre abonnement en cours...', true);
+    return false;
+  }
   // Anti-spam: minimum 3 seconds between searches
   if (now - lastSearchTime < 3000) {
     showToast('⚠ Attendez quelques secondes avant de relancer une recherche', true);
