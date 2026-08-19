@@ -1186,13 +1186,16 @@ async function checkUserPlan() {
         p.planId === 'pln_pro-888003rj' ||
         p.planId === 'pln_entreprise-237m0uzz'
       );
+      if (userHasPro) {
+        const banner = document.getElementById('limitBanner');
+        if (banner) banner.style.display = 'none';
+        searchCount = 0;
+        localStorage.removeItem('tf_count_' + TODAY);
+      }
       // Mettre à jour l'affichage du compteur si déjà rendu
       if (userHasPro) {
         const banner = document.getElementById('limitBanner');
         if (banner) banner.style.display = 'none';
-        // Réinitialise le compteur si un Pro avait été comptabilisé par erreur
-        searchCount = 0;
-        localStorage.removeItem('tf_count_' + TODAY);
       }
     }
   } catch(e) {}
@@ -1649,7 +1652,7 @@ async function tfSearchWithFilter() {
       gmaps: p.googleMapsUri ?? null,
     })).filter(c => c.distance <= radius / 1000).sort((a, b) => a.distance - b.distance);
 
-    const count = tfResults.filter(c => c.reviews >= 5).length;
+    const count = filterResults(tfResults).length;
     document.getElementById('tfCount').innerHTML = `<span>${count}</span> société${count > 1 ? 's' : ''} trouvée${count > 1 ? 's' : ''}`;
     document.getElementById('tfLoc').textContent = `près de ${tfLabel} · rayon ${radius / 1000} km`;
     tfRenderCards();
@@ -1661,7 +1664,7 @@ async function tfSearchWithFilter() {
 // On page load, check URL hash and apply filter
 window.addEventListener('load', function() {
   const hash = window.location.hash.replace('#', '');
-  if (hash && filterKeywords[hash]) {
+  if (hash && filterQueries[hash]) {
     const btn = document.querySelector('[data-filter="' + hash + '"]');
     if (btn) setFilter(btn, hash);
   }
@@ -1669,7 +1672,6 @@ window.addEventListener('load', function() {
 
 function filterResults(results) {
   return results
-    .filter(c => c.reviews >= 5)        // Min 5 avis
     .filter(c => isValidTransport(c));   // Pas de points relais / non-transport
 }
 function tfPhotoUrl(name){return name?`/api/places?endpoint=photo&name=${encodeURIComponent(name)}&maxWidthPx=80`:null;}
@@ -1878,7 +1880,7 @@ async function _checkAuthState() {
     }
     
     // Also show welcome after fresh payment (URL contains fromCheckout)
-    if (!_welcomeShown && window.location.search.includes('fromCheckout') && m && m.data && hasPlan) {
+    if (!_welcomeShown && window.location.search.includes('fromCheckout') && m && m.data && plans.length > 0) {
       const hasPro = plans.some(p => p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp');
       _welcomeShown = true;
       await checkMember();
