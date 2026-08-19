@@ -1488,8 +1488,9 @@ async function tfSearch() {
           body:JSON.stringify({endpoint:'searchText',textQuery:q,locationBias:{circle:{center:{latitude:tfLat,longitude:tfLng},radius}},languageCode:'fr',maxResultCount:20})
         });
         const d = await r.json();
+        if (d.error) console.warn('Places API error:', d.error);
         (d.places||[]).forEach(p=>{if(!seen.has(p.id))seen.set(p.id,p);});
-      } catch(e){}
+      } catch(e){ console.warn('Query failed:', e.message); }
     }
     tfResults = Array.from(seen.values()).map(p=>({
       id:p.id,name:p.displayName?.text||'Nom inconnu',address:p.formattedAddress||'Adresse non disponible',
@@ -1505,7 +1506,8 @@ async function tfSearch() {
       : `près de ${tfLabel} · rayon ${radius/1000} km · ${3-searchCount} recherche${3-searchCount>1?'s':''} restante${3-searchCount>1?'s':''}`;
     tfRenderCards();
   } catch(err) {
-    document.getElementById('tfCards').innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">⚠️</div><h3>Erreur</h3><p>${err.message}</p></div>`;
+    console.error('tfSearch error:', err);
+    document.getElementById('tfCards').innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">⚠️</div><h3>Erreur de recherche</h3><p>${err.message}</p><p style="font-size:.75rem;color:rgba(255,255,255,.3);margin-top:8px">Réessayez ou contactez le support</p></div>`;
   } finally {
     isSearching = false;
     const searchBtn = document.getElementById('tfSearchBtn');
@@ -1634,8 +1636,9 @@ async function tfSearchWithFilter() {
           })
         });
         const d = await r.json();
+        if (d.error) console.warn('Places API error:', d.error);
         (d.places || []).forEach(p => { if (!seen.has(p.id)) seen.set(p.id, p); });
-      } catch(e) {}
+      } catch(e) { console.warn('Query failed:', e.message); }
     }
 
     tfResults = Array.from(seen.values()).map(p => ({
