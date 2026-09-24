@@ -1240,6 +1240,17 @@ function incrementSearch() {
 // Check plan on load
 window.addEventListener('load', checkUserPlan);
 
+// Recheck plan silencieusement si user vient de payer (URL fromCheckout)
+window.addEventListener('load', async function() {
+  if (window.location.search.includes('fromCheckout')) {
+    // Attendre un peu plus longtemps — Stripe → Memberstack peut prendre jusqu'à 10s
+    setTimeout(async () => {
+      planCheckReady = false;
+      await checkUserPlan();
+    }, 4000);
+  }
+});
+
 // ══ NAVIGATION ════════════════════════
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1386,11 +1397,13 @@ async function accessTool(tool) {
 
     let plans = member.data.planConnections || [];
 
-    // Si aucun plan détecté, on retente jusqu'à 3 fois avec des délais croissants —
-    // le webhook Stripe → Memberstack peut prendre plusieurs secondes à synchroniser
+    // Si aucun plan détecté, on retente jusqu'à 4 fois avec des délais croissants —
+    // le webhook Stripe → Memberstack peut prendre jusqu'à 10-15s après un paiement
     let attempts = 0;
-    while (plans.length === 0 && attempts < 3) {
-      await new Promise(r => setTimeout(r, 1500 * (attempts + 1))); // 1.5s, 3s, 4.5s
+    while (plans.length === 0 && attempts < 4) {
+      const delay = attempts < 3 ? 1500 * (attempts + 1) : 8000; // 1.5s, 3s, 4.5s, 8s
+      if (attempts === 0) showToast('⏳ Vérification de votre abonnement...', false);
+      await new Promise(r => setTimeout(r, delay));
       member = await window.$memberstackDom.getCurrentMember({ useCache: false });
       plans = (member && member.data) ? (member.data.planConnections || []) : [];
       attempts++;
@@ -1864,10 +1877,13 @@ async function _checkAuthState() {
           attempts++;
         }
 
-        const hasActivePlan = plans.some(p => p.status === 'ACTIVE') || plans.length > 0;
+        const hasActivePlan = plans.length > 0;
         if (hasActivePlan && !_welcomeShown) {
-          const hasPro = plans.some(p => 
-            (p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp') && p.status === 'ACTIVE'
+          const hasPro = plans.some(p =>
+            p.priceId === 'prc_pro-ei8103c9' ||
+            p.priceId === 'prc_entreprise-ib6k0elp' ||
+            p.planId === 'pln_pro-888003rj' ||
+            p.planId === 'pln_entreprise-237m0uzz'
           );
           _welcomeShown = true;
           showWelcomePopup(hasPro);
@@ -1897,7 +1913,7 @@ async function _checkAuthState() {
 
 window.addEventListener('load', function() {
   setTimeout(_checkAuthState, 500);
-  setInterval(_checkAuthState, 1000);
+  setInterval(_checkAuthState, 5000); // Toutes les 5s — évite les appels Memberstack concurrents
 });
 </script>
 </body>
