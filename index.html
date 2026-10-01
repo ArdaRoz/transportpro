@@ -1320,7 +1320,28 @@ async function msSignup(e, priceId) {
     const { data: member } = await window.$memberstackDom.getCurrentMember({ useCache: false });
     
     if (member) {
-      // Connecté → checkout direct avec priceId
+      // Connecté → vérifier d'abord qu'il n'a pas DÉJÀ un abonnement payant
+      // (évite qu'un client paie 2 abonnements en même temps, ex. Entreprise + Pro)
+      const PAID_PRICES = ['prc_starter-mw82039c', 'prc_pro-ei8103c9', 'prc_entreprise-ib6k0elp'];
+      const PAID_PLANS  = ['pln_starter-2c70ujw', 'pln_pro-888003rj', 'pln_entreprise-237m0uzz'];
+      const activePaid = (member.planConnections || []).filter(p =>
+        (PAID_PRICES.includes(p.priceId) || PAID_PLANS.includes(p.planId)) &&
+        !/CANCEL|END|EXPIRED|INACTIVE/i.test(String(p.status || ''))
+      );
+      if (activePaid.length > 0) {
+        if (activePaid.some(p => p.priceId === priceId)) {
+          showToast('✓ Vous avez déjà cet abonnement', false);
+        } else {
+          showToast('ℹ Vous avez déjà un abonnement. Pour changer d\'offre, passez par "Mon compte".', true);
+          try {
+            await window.$memberstackDom.launchStripeCustomerPortal();
+          } catch (portalErr) {
+            window.$memberstackDom.openModal('PROFILE');
+          }
+        }
+        return;
+      }
+      // Aucun abonnement actif → checkout direct avec priceId
       await window.$memberstackDom.purchasePlansWithCheckout({ priceId: priceId });
     } else {
       // Non connecté → signup avec plan attaché (planId = priceId selon doc Memberstack)
