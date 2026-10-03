@@ -660,7 +660,7 @@ button,select,input{font-family:inherit;cursor:pointer}
             <div class="price-feat price-feat-no"><span class="price-feat-icon">✗</span><span style="color:rgba(255,255,255,.25)">Simulateur de charges</span></div>
             <div class="price-feat price-feat-no"><span class="price-feat-icon">✗</span><span style="color:rgba(255,255,255,.25)">Recherches illimitées</span></div>
           </div>
-          <button class="btn btn-outline btn-full btn-lg" data-ms-price:add="prc_starter-mw82039c" onclick="msSignup(event, 'prc_starter-mw82039c')">Commencer — 9,99€/mois →</button>
+          <button class="btn btn-outline btn-full btn-lg" onclick="msSignup(event, 'prc_starter-mw82039c')">Commencer — 9,99€/mois →</button>
         </div>
 
         <!-- PRO -->
@@ -678,7 +678,7 @@ button,select,input{font-family:inherit;cursor:pointer}
             <div class="price-feat"><span class="price-feat-icon">✓</span>France & Belgique</div>
             <div class="price-feat"><span class="price-feat-icon">✓</span>Support prioritaire</div>
           </div>
-          <button class="btn btn-primary btn-full btn-lg" data-ms-price:add="prc_pro-ei8103c9" onclick="msSignup(event, 'prc_pro-ei8103c9')">Commencer — 29,99€/mois →</button>
+          <button class="btn btn-primary btn-full btn-lg" onclick="msSignup(event, 'prc_pro-ei8103c9')">Commencer — 29,99€/mois →</button>
         </div>
 
         <!-- ENTREPRISE -->
@@ -695,7 +695,7 @@ button,select,input{font-family:inherit;cursor:pointer}
             <div class="price-feat"><span class="price-feat-icon">✓</span>Support VIP dédié</div>
             <div class="price-feat"><span class="price-feat-icon">✓</span>Accès aux futures fonctionnalités</div>
           </div>
-          <button class="btn btn-amber btn-full btn-lg" data-ms-price:add="prc_entreprise-ib6k0elp" onclick="msSignup(event, 'prc_entreprise-ib6k0elp')">Commencer — 79,99€/mois →</button>
+          <button class="btn btn-amber btn-full btn-lg" onclick="msSignup(event, 'prc_entreprise-ib6k0elp')">Commencer — 79,99€/mois →</button>
         </div>
 
       </div>
@@ -1316,18 +1316,19 @@ const MS_PLANS = {
 
 async function msSignup(e, priceId) {
   e.preventDefault();
+  const PAID_PRICES = ['prc_starter-mw82039c', 'prc_pro-ei8103c9', 'prc_entreprise-ib6k0elp'];
+  const PAID_PLANS  = ['pln_starter-2c70ujw', 'pln_pro-888003rj', 'pln_entreprise-237m0uzz'];
+  const getActivePaid = (mem) => ((mem && mem.planConnections) || []).filter(p =>
+    (PAID_PRICES.includes(p.priceId) || PAID_PLANS.includes(p.planId)) &&
+    !/CANCEL|END|EXPIRED|INACTIVE/i.test(String(p.status || ''))
+  );
   try {
     const { data: member } = await window.$memberstackDom.getCurrentMember({ useCache: false });
     
     if (member) {
       // Connecté → vérifier d'abord qu'il n'a pas DÉJÀ un abonnement payant
       // (évite qu'un client paie 2 abonnements en même temps, ex. Entreprise + Pro)
-      const PAID_PRICES = ['prc_starter-mw82039c', 'prc_pro-ei8103c9', 'prc_entreprise-ib6k0elp'];
-      const PAID_PLANS  = ['pln_starter-2c70ujw', 'pln_pro-888003rj', 'pln_entreprise-237m0uzz'];
-      const activePaid = (member.planConnections || []).filter(p =>
-        (PAID_PRICES.includes(p.priceId) || PAID_PLANS.includes(p.planId)) &&
-        !/CANCEL|END|EXPIRED|INACTIVE/i.test(String(p.status || ''))
-      );
+      const activePaid = getActivePaid(member);
       if (activePaid.length > 0) {
         if (activePaid.some(p => p.priceId === priceId)) {
           showToast('✓ Vous avez déjà cet abonnement', false);
@@ -1346,8 +1347,17 @@ async function msSignup(e, priceId) {
     } else {
       // Non connecté → signup avec plan attaché (planId = priceId selon doc Memberstack)
       window.$memberstackDom.openModal('SIGNUP', { planId: priceId })
-        .then(({ data }) => {
+        .then(async ({ data }) => {
           window.$memberstackDom.hideModal();
+          // Compte créé (ou connexion) → paiement du plan choisi UNIQUEMENT
+          // s'il n'a aucun abonnement payant actif (anti-double abonnement)
+          try {
+            const { data: nm } = await window.$memberstackDom.getCurrentMember({ useCache: false });
+            if (nm && getActivePaid(nm).length === 0) {
+              await window.$memberstackDom.purchasePlansWithCheckout({ priceId: priceId });
+              return;
+            }
+          } catch (ckErr) { console.log('Checkout error:', ckErr); }
           setTimeout(async () => {
             await checkMember();
             await checkUserPlan();
@@ -1473,7 +1483,8 @@ async function accessTool(tool) {
 
 
 function goToStripe(plan) {
-  window.open(STRIPE[plan], '_blank');
+  // Passe par msSignup : vérifie d'abord les abonnements déjà actifs (anti-double abonnement)
+  msSignup({ preventDefault() {} }, MS_PLANS[plan]);
 }
 document.getElementById('navBurger').addEventListener('click', () => {
   const l = document.querySelector('.nav-links');
