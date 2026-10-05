@@ -1164,10 +1164,19 @@ let userHasPro = false;
 let isSearching = false; // Prevent concurrent requests
 let planCheckReady = false; // Becomes true once checkUserPlan() finishes
 
+// Abonnement encore valable ? (un abonnement annulé, expiré ou impayé ne donne plus accès)
+const INACTIVE_PLAN_STATUSES = ['CANCELED', 'CANCELLED', 'ENDED', 'EXPIRED', 'INACTIVE', 'UNPAID', 'INCOMPLETE_EXPIRED'];
+function isPlanActive(p) {
+  return !!p && !INACTIVE_PLAN_STATUSES.includes(String(p.status || '').toUpperCase());
+}
+function activePlans(list) {
+  return (list || []).filter(isPlanActive);
+}
+
 async function checkUserPlan() {
   try {
     let member = await window.$memberstackDom.getCurrentMember({ useCache: false });
-    let plans = (member && member.data) ? (member.data.planConnections || []) : [];
+    let plans = (member && member.data) ? activePlans(member.data.planConnections) : [];
 
     // Retry jusqu'à 3 fois si aucun plan trouvé — Memberstack peut ne pas avoir
     // fini de synchroniser juste après une inscription/connexion récente
@@ -1175,7 +1184,7 @@ async function checkUserPlan() {
     while (plans.length === 0 && member && member.data && attempts < 3) {
       await new Promise(r => setTimeout(r, 1500 * (attempts + 1)));
       member = await window.$memberstackDom.getCurrentMember({ useCache: false });
-      plans = (member && member.data) ? (member.data.planConnections || []) : [];
+      plans = (member && member.data) ? activePlans(member.data.planConnections) : [];
       attempts++;
     }
 
@@ -1318,9 +1327,8 @@ async function msSignup(e, priceId) {
   e.preventDefault();
   const PAID_PRICES = ['prc_starter-mw82039c', 'prc_pro-ei8103c9', 'prc_entreprise-ib6k0elp'];
   const PAID_PLANS  = ['pln_starter-2c70ujw', 'pln_pro-888003rj', 'pln_entreprise-237m0uzz'];
-  const getActivePaid = (mem) => ((mem && mem.planConnections) || []).filter(p =>
-    (PAID_PRICES.includes(p.priceId) || PAID_PLANS.includes(p.planId)) &&
-    !/CANCEL|END|EXPIRED|INACTIVE/i.test(String(p.status || ''))
+  const getActivePaid = (mem) => activePlans(mem && mem.planConnections).filter(p =>
+    PAID_PRICES.includes(p.priceId) || PAID_PLANS.includes(p.planId)
   );
   try {
     const { data: member } = await window.$memberstackDom.getCurrentMember({ useCache: false });
@@ -1362,7 +1370,7 @@ async function msSignup(e, priceId) {
             await checkMember();
             await checkUserPlan();
             let m = await window.$memberstackDom.getCurrentMember({ useCache: false });
-            let plans = (m && m.data) ? (m.data.planConnections || []) : [];
+            let plans = (m && m.data) ? activePlans(m.data.planConnections) : [];
 
             // Retry jusqu'à 3 fois — le webhook Stripe → Memberstack peut prendre
             // plusieurs secondes après un paiement frais
@@ -1370,7 +1378,7 @@ async function msSignup(e, priceId) {
             while (plans.length === 0 && attempts < 3) {
               await new Promise(r => setTimeout(r, 1500 * (attempts + 1)));
               m = await window.$memberstackDom.getCurrentMember({ useCache: false });
-              plans = (m && m.data) ? (m.data.planConnections || []) : [];
+              plans = (m && m.data) ? activePlans(m.data.planConnections) : [];
               attempts++;
             }
 
@@ -1426,7 +1434,7 @@ async function accessTool(tool) {
       return;
     }
 
-    let plans = member.data.planConnections || [];
+    let plans = activePlans(member.data.planConnections);
 
     // Si aucun plan détecté, on retente jusqu'à 4 fois avec des délais croissants —
     // le webhook Stripe → Memberstack peut prendre jusqu'à 10-15s après un paiement
@@ -1436,7 +1444,7 @@ async function accessTool(tool) {
       if (attempts === 0) showToast('⏳ Vérification de votre abonnement...', false);
       await new Promise(r => setTimeout(r, delay));
       member = await window.$memberstackDom.getCurrentMember({ useCache: false });
-      plans = (member && member.data) ? (member.data.planConnections || []) : [];
+      plans = (member && member.data) ? activePlans(member.data.planConnections) : [];
       attempts++;
     }
 
@@ -1891,7 +1899,7 @@ let _msState = 'unknown';
 async function _checkAuthState() {
   try {
     let m = await window.$memberstackDom.getCurrentMember({ useCache: false });
-    let plans = (m && m.data) ? (m.data.planConnections || []) : [];
+    let plans = (m && m.data) ? activePlans(m.data.planConnections) : [];
     const state = (m && m.data) ? (m.data.id || 'logged_in') : 'logged_out';
     
     if (_msState !== 'unknown' && _msState !== state) {
@@ -1905,7 +1913,7 @@ async function _checkAuthState() {
         while (plans.length === 0 && attempts < 3) {
           await new Promise(r => setTimeout(r, 1500 * (attempts + 1)));
           m = await window.$memberstackDom.getCurrentMember({ useCache: false });
-          plans = (m && m.data) ? (m.data.planConnections || []) : [];
+          plans = (m && m.data) ? activePlans(m.data.planConnections) : [];
           attempts++;
         }
 
