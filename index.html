@@ -1664,6 +1664,9 @@ function setFilter(btn, filter) {
 }
 
 async function tfSearchWithFilter() {
+  // Un filtre relance une vraie recherche Google : même limite que tfSearch (3/jour en Starter)
+  if (!canSearch()) { tfRenderCards(); return; }
+  isSearching = true;
   const radius = parseInt(document.getElementById('tfRadius').value);
   const queries = filterQueries[activeFilter] || filterQueries[''];
   
@@ -1708,12 +1711,17 @@ async function tfSearchWithFilter() {
       gmaps: p.googleMapsUri ?? null,
     })).filter(c => c.distance <= radius / 1000).sort((a, b) => a.distance - b.distance);
 
+    incrementSearch();
     const count = filterResults(tfResults).length;
     document.getElementById('tfCount').innerHTML = `<span>${count}</span> société${count > 1 ? 's' : ''} trouvée${count > 1 ? 's' : ''}`;
-    document.getElementById('tfLoc').textContent = `près de ${tfLabel} · rayon ${radius / 1000} km`;
+    document.getElementById('tfLoc').textContent = userHasPro
+      ? `près de ${tfLabel} · rayon ${radius / 1000} km · recherches illimitées`
+      : `près de ${tfLabel} · rayon ${radius / 1000} km · ${3-searchCount} recherche${3-searchCount>1?'s':''} restante${3-searchCount>1?'s':''}`;
     tfRenderCards();
   } catch(err) {
     document.getElementById('tfCards').innerHTML = `<div class="tf-empty"><div class="tf-empty-icon">⚠️</div><h3>Erreur</h3><p>${err.message}</p></div>`;
+  } finally {
+    isSearching = false;
   }
 }
 
@@ -1746,14 +1754,14 @@ function tfRenderCards(){
     const photo=tfPhotoUrl(c.photo);
     const img=photo?`<img src="${photo}" loading="lazy" onerror="this.parentElement.innerHTML='🏢'"/>`:'🏢';
     const badge=c.open===true?'<span class="tf-badge tf-badge-open">● Ouvert</span>':c.open===false?'<span class="tf-badge tf-badge-closed">● Fermé</span>':'';
-    return `<div class="tf-card" style="animation-delay:${i*55}ms" onclick="tfOpenModal(${i})">
+    return `<div class="tf-card" style="animation-delay:${i*55}ms" onclick="tfOpenModal(${tfResults.indexOf(c)})">
       <div class="tf-card-head"><div class="tf-avatar">${img}</div><div>${badge}</div></div>
       <div class="tf-name">${c.name}</div>
       <div class="tf-addr">📍 ${c.address}</div>
       <div class="tf-stats"><div>${stars}</div><span class="tf-dist">${c.distance} km</span></div>
       <div class="tf-actions">
-        ${c.phone?`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();window.location.href='tel:${c.phone.replace(/\s/g,'')}'">📞 Appeler</button>`:`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();tfOpenModal(${i})">📞 Contacter</button>`}
-        <button class="tf-btn tf-btn-detail" onclick="event.stopPropagation();tfOpenModal(${i})">Détails →</button>
+        ${c.phone?`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();window.location.href='tel:${c.phone.replace(/\s/g,'')}'">📞 Appeler</button>`:`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();tfOpenModal(${tfResults.indexOf(c)})">📞 Contacter</button>`}
+        <button class="tf-btn tf-btn-detail" onclick="event.stopPropagation();tfOpenModal(${tfResults.indexOf(c)})">Détails →</button>
       </div>
     </div>`;
   }).join('');
