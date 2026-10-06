@@ -39,7 +39,11 @@ export default async function handler(req, res) {
 
     if (endpoint === 'photo') {
       // name = resource name like "places/xxx/photos/yyy"
-      const width = maxWidthPx || 80;
+      // Sécurité : n'accepter qu'un vrai nom de photo Google (sinon le proxy pourrait appeler d'autres API Google avec la clé)
+      if (typeof name !== 'string' || !/^places\/[A-Za-z0-9_-]+\/photos\/[A-Za-z0-9_-]+$/.test(name)) {
+        return res.status(400).json({ error: 'Nom de photo invalide' });
+      }
+      const width = Math.min(Math.max(parseInt(maxWidthPx, 10) || 80, 16), 800);
       const url = `https://places.googleapis.com/v1/${name}/media?maxWidthPx=${width}&key=${GKEY}&skipHttpRedirect=false`;
       const r = await fetch(url, { redirect: 'follow' });
       if (!r.ok) {
