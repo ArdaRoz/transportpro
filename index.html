@@ -1550,6 +1550,7 @@ async function tfSearch() {
       rating:p.rating??null,reviews:p.userRatingCount??0,open:p.currentOpeningHours?.openNow??null,
       photo:p.photos?.[0]?.name??null,distance:km(tfLat,tfLng,p.location?.latitude??tfLat,p.location?.longitude??tfLng),
       phone:p.nationalPhoneNumber??null,website:p.websiteUri??null,gmaps:p.googleMapsUri??null,
+      types:p.types||[],primaryType:p.primaryType||'',
     })).filter(c=>c.distance<=radius/1000).sort((a,b)=>a.distance-b.distance);
     incrementSearch();
     const filteredCount = filterResults(tfResults).length;
@@ -1573,58 +1574,140 @@ function tfSortAndRender(){const v=document.getElementById('tfSort').value;if(v=
 // ── FILTRES ──────────────────────────────────
 let activeFilter = '';
 
-// Requêtes Google Places spécifiques par filtre - ciblées dépôts uniquement
+// Requêtes Google Places spécifiques par filtre — formulées pour ne viser QUE des sociétés de transport
+// (pas de mots "dépôt", "entrepôt", "livraison", "médicaments" qui ramenaient supermarchés, pharmacies, dépôts-vente…)
+// Une requête en néerlandais par filtre : indispensable à Bruxelles et en Flandre.
 const filterQueries = {
   '': [
-    'société transport routier marchandises',
-    'entreprise logistique transport',
-    'transporteur routier dépôt'
+    'société de transport routier de marchandises',
+    'transporteur routier entreprise de transport',
+    'transportbedrijf goederenvervoer'
   ],
   'express': [
-    'société transport express marchandises dépôt',
-    'entreprise livraison express urgente dépôt',
-    'transport dédié express dépôt logistique',
-    'coursier express entreprise transport',
-    'société transport rapide marchandises'
+    'société de transport express de marchandises',
+    'transporteur express course urgente entreprise',
+    'société de coursiers transport express',
+    'transport dédié express transporteur',
+    'koeriersbedrijf express transport'
   ],
   'frigo': [
-    'transport frigorifique dépôt logistique',
-    'société transport réfrigéré marchandises',
-    'entreprise transport pharmaceutique médicaments dépôt',
-    'transport température dirigée frigorifique entrepôt',
-    'logistique pharmaceutique transport médical dépôt',
-    'transport surgelés frigorifique entrepôt'
+    'transporteur frigorifique',
+    'société de transport frigorifique température dirigée',
+    'transport réfrigéré de marchandises société',
+    'transporteur pharmaceutique GDP transport médical',
+    'transport surgelés transporteur',
+    'koeltransport transportbedrijf'
   ],
   'nuit': [
-    'transport nocturne dépôt logistique',
-    'société transport nuit marchandises',
-    'entreprise transport 24h logistique dépôt',
-    'transport permanent nuit weekend marchandises'
+    'société de transport de nuit',
+    'transporteur routier 24h/24',
+    'société de transport routier nuit et week-end',
+    'transportbedrijf nachttransport'
   ],
 
   'international': [
-    'transport international routier dépôt logistique',
-    'société fret international Europe entrepôt',
-    'entreprise transport routier international Europe',
-    'logistique internationale douane transit dépôt',
-    'transport transfrontalier Europe dépôt logistique'
+    'transport routier international transporteur',
+    'société de transport international Europe',
+    'commissionnaire de transport fret international',
+    'transitaire transport international',
+    'internationaal transportbedrijf'
   ]
 };
 
-// Post-filter to remove non-transport results
+// ══ FILTRE QUALITÉ : on ne garde QUE des sociétés de transport ══════════════
+// Texte sans accents, en minuscules, pour comparer facilement
+function tfNorm(s) {
+  return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+function tfWordRegex(words) {
+  const esc = words.map(w => tfNorm(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  return new RegExp('(^|[^a-z0-9])(' + esc.join('|') + ')(?=$|[^a-z0-9])');
+}
+
+// Noms à exclure TOUJOURS (vérifiés sur le NOM seulement, jamais sur l'adresse)
 const excludeKeywords = [
-  'point relais', 'relais colis', 'bureau de poste', 'boite postale',
-  'tabac', 'presse', 'supermarché', 'pharmacie', 'épicerie', 'librairie',
-  'restaurant', 'café', 'hotel', 'pressing', 'salon', 'coiffeur',
-  'agence postale', 'post office', 'pickup', 'pack station',
-  'consigne', 'locker', 'kiala', 'mondial relay'
+  // Points relais / retrait de colis / poste
+  'point relais', 'relais colis', 'mondial relay', 'relay', 'kiala', 'inpost', 'locker', 'packstation',
+  'pickup', 'pick-up', 'pick up', 'parcelshop', 'parcel shop', 'paketshop', 'servicepoint', 'service point',
+  'access point', 'point poste', 'point colis', 'colis point', 'bpost point', 'bureau de poste', 'bureau bpost',
+  'agence postale', 'post office', 'postkantoor', 'postpunt', 'pakketpunt', 'afhaalpunt', 'ophaalpunt',
+  'amazon hub', 'consigne', 'boite postale',
+  // Night shops, épiceries, presse, tabac…
+  'night shop', 'nightshop', 'night & day', 'night and day', 'day & night', 'day and night', 'nachtwinkel',
+  'alimentation', 'epicerie', 'superette', 'minimarket', 'mini market', 'mini-market', 'supermarche',
+  'supermarkt', 'hypermarche', 'buurtwinkel', 'voeding', 'phone shop', 'call shop', 'callshop',
+  'tabac', 'presse', 'librairie', 'journaux', 'kiosque', 'dagbladhandel', 'krantenwinkel',
+  // Grandes surfaces & magasins (leurs dépôts ne sont pas des transporteurs)
+  'carrefour', 'delhaize', 'colruyt', 'okay', 'bio-planet', 'aldi', 'lidl', 'albert heijn', 'intermarche',
+  'spar', 'proxy', 'cora', 'makro', 'match', 'smatch', 'louis delhaize', 'leclerc', 'auchan', 'monoprix',
+  'franprix', 'casino', 'super u', 'hyper u', 'action', 'kruidvat', 'ikea', 'brico', 'hubo', 'gamma',
+  'leroy merlin', 'decathlon', 'mediamarkt', 'media markt', 'vanden borre', 'krefel', 'zeeman', 'hema',
+  // Stations-service, lavage
+  'station service', 'station-service', 'tankstation', 'shell', 'totalenergies', 'esso', 'q8', 'lukoil',
+  'texaco', 'dats 24', 'octa+', 'car wash', 'carwash',
+  // "Dépôts" qui n'ont rien à voir avec le transport
+  'depot vente', 'depot-vente', 'depot de pain', 'brico depot', 'depot de bus', 'busdepot', 'stelplaats',
+  'stib', 'mivb', 'de lijn',
+  // Divers non-transport
+  'pharmacie', 'apotheek', 'restaurant', 'cafe', 'snack', 'friterie', 'frituur', 'boulangerie', 'bakkerij',
+  'boucherie', 'hotel', 'pressing', 'salon', 'coiffeur', 'coiffure', 'kapper', 'laverie', 'wassalon'
 ];
+const excludeRegex = tfWordRegex(excludeKeywords);
+
+// Mots qui prouvent que c'est bien une société de transport
+const transportKeywords = [
+  'transport', 'transports', 'transporteur', 'transporteurs', 'trans', 'logistique', 'logistics', 'logistic',
+  'logistiek', 'freight', 'fret', 'cargo', 'express', 'courier', 'coursier', 'coursiers', 'koerier',
+  'messagerie', 'demenagement', 'demenagements', 'verhuis', 'verhuizingen', 'vervoer', 'transportbedrijf',
+  'expedition', 'expeditions', 'shipping', 'trucking', 'trucks', 'camion', 'camions', 'spedition',
+  'forwarding', 'transit', 'transitaire', 'affretement', 'distribution', 'delivery', 'frigo', 'koeltransport',
+  'dhl', 'dpd', 'gls', 'ups', 'fedex', 'tnt', 'geodis', 'dachser', 'kuehne', 'schenker', 'ziegler',
+  'h.essers', 'essers', 'jost', 'gheys', 'vos logistics', 'xpo', 'stef', 'girteka', 'raben'
+];
+// Mots longs : cherchés n'importe où dans le nom ("Transports Dupont", "EuroLogistics") ;
+// mots courts (DHL, UPS, GLS…) : seulement en mot entier, pour éviter les faux positifs
+const transportLongRegex = new RegExp('(' + transportKeywords.filter(w => w.length >= 5).map(w => tfNorm(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')');
+const transportShortRegex = tfWordRegex(transportKeywords.filter(w => w.length < 5));
+function tfNameLooksTransport(name) {
+  return transportLongRegex.test(name) || transportShortRegex.test(name);
+}
+
+// Catégories Google qui ne sont JAMAIS des sociétés de transport
+const blockedTypes = [
+  'supermarket', 'grocery_store', 'convenience_store', 'liquor_store', 'food_store', 'market',
+  'gas_station', 'post_office', 'pharmacy', 'drugstore', 'restaurant', 'cafe', 'bar', 'bakery',
+  'meal_takeaway', 'meal_delivery', 'fast_food_restaurant', 'lodging', 'hotel', 'shopping_mall',
+  'department_store', 'discount_store', 'hypermarket', 'bus_station', 'transit_station', 'train_station',
+  'subway_station', 'bus_stop', 'hospital', 'doctor', 'dentist', 'bank', 'atm', 'beauty_salon',
+  'hair_care', 'laundry', 'school', 'church', 'place_of_worship', 'tourist_attraction'
+];
+// Catégories douteuses : exclues SAUF si le nom montre clairement une société de transport
+const doubtfulTypes = [
+  'store', 'wholesaler', 'storage', 'self_storage', 'car_repair', 'car_dealer', 'car_wash', 'parking',
+  'real_estate_agency', 'home_improvement_store', 'hardware_store', 'furniture_store', 'electronics_store',
+  'clothing_store', 'cell_phone_store', 'shoe_store', 'book_store', 'gift_shop', 'pet_store', 'florist'
+];
+// Si l'une de ces catégories apparaît (même en secondaire) → jamais un transporteur
+const alwaysBlockedTypes = ['supermarket', 'grocery_store', 'convenience_store', 'liquor_store', 'gas_station', 'post_office', 'pharmacy'];
+function tfIsShopType(t) {
+  return /_(store|restaurant|shop)$/.test(t);
+}
 
 function isValidTransport(company) {
-  const text = (company.name + ' ' + company.address).toLowerCase();
-  // Exclude point relais and non-transport businesses
-  const hasExcluded = excludeKeywords.some(kw => text.includes(kw));
-  if (hasExcluded) return false;
+  const name = tfNorm(company.name);
+  const types = (company.types || []).map(String);
+  const primary = String(company.primaryType || '');
+
+  // 1. Nom de magasin, night shop, point relais, grande surface… → dehors
+  if (excludeRegex.test(name)) return false;
+
+  // 2. Catégorie Google clairement hors transport → dehors
+  if (blockedTypes.includes(primary) || types.some(t => alwaysBlockedTypes.includes(t))) return false;
+
+  // 3. Catégorie douteuse (magasin, garde-meubles, garage…) → gardé seulement si le nom dit "transport"
+  const looksTransport = tfNameLooksTransport(name) || types.includes('moving_company') || types.includes('courier_service');
+  if ((doubtfulTypes.includes(primary) || tfIsShopType(primary)) && !looksTransport) return false;
+
   return true;
 }
 
@@ -1709,6 +1792,8 @@ async function tfSearchWithFilter() {
       phone: p.nationalPhoneNumber ?? null,
       website: p.websiteUri ?? null,
       gmaps: p.googleMapsUri ?? null,
+      types: p.types || [],
+      primaryType: p.primaryType || '',
     })).filter(c => c.distance <= radius / 1000).sort((a, b) => a.distance - b.distance);
 
     incrementSearch();
