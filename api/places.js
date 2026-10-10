@@ -89,7 +89,7 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.currentOpeningHours,places.photos,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri',
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.currentOpeningHours,places.photos,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri,places.types,places.primaryType',
         },
         body: JSON.stringify(payload),
       });
