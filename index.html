@@ -1172,6 +1172,33 @@ function isPlanActive(p) {
 function activePlans(list) {
   return (list || []).filter(isPlanActive);
 }
+// Plan Pro ou Entreprise ? Memberstack range le priceId soit directement, soit dans p.payment.priceId
+const PRO_PRICE_IDS = ['prc_pro-ei8103c9', 'prc_entreprise-ib6k0elp'];
+const PRO_PLAN_IDS  = ['pln_pro-888003rj', 'pln_entreprise-237m0uzz'];
+function isProPlan(p) {
+  if (!p) return false;
+  const price = p.priceId || (p.payment && p.payment.priceId) || '';
+  return PRO_PRICE_IDS.includes(price) || PRO_PLAN_IDS.includes(p.planId);
+}
+// Applique le statut Pro partout (recherches illimitées, bannière cachée)
+function applyProStatus(isPro) {
+  userHasPro = !!isPro;
+  if (userHasPro) {
+    searchCount = 0;
+    try { localStorage.removeItem('tf_count_' + TODAY); } catch(e) {}
+    const banner = document.getElementById('limitBanner');
+    if (banner) banner.style.display = 'none';
+  }
+}
+// Revérifie EN DIRECT l'abonnement auprès de Memberstack (sans cache)
+async function refreshProStatus() {
+  try {
+    const m = await window.$memberstackDom.getCurrentMember({ useCache: false });
+    const plans = (m && m.data) ? activePlans(m.data.planConnections) : [];
+    applyProStatus(plans.some(isProPlan));
+  } catch(e) {}
+  return userHasPro;
+}
 
 async function checkUserPlan() {
   try {
@@ -1189,29 +1216,13 @@ async function checkUserPlan() {
     }
 
     if (member && member.data) {
-      userHasPro = plans.some(p =>
-        p.priceId === 'prc_pro-ei8103c9' ||
-        p.priceId === 'prc_entreprise-ib6k0elp' ||
-        p.planId === 'pln_pro-888003rj' ||
-        p.planId === 'pln_entreprise-237m0uzz'
-      );
-      if (userHasPro) {
-        const banner = document.getElementById('limitBanner');
-        if (banner) banner.style.display = 'none';
-        searchCount = 0;
-        localStorage.removeItem('tf_count_' + TODAY);
-      }
-      // Mettre à jour l'affichage du compteur si déjà rendu
-      if (userHasPro) {
-        const banner = document.getElementById('limitBanner');
-        if (banner) banner.style.display = 'none';
-      }
+      applyProStatus(plans.some(isProPlan));
     }
   } catch(e) {}
   planCheckReady = true; // Autorise les recherches dans tous les cas
 }
 
-function canSearch() {
+async function canSearch() {
   const now = Date.now();
   // Attendre que la vérification du plan soit terminée
   if (!planCheckReady) {
@@ -1228,7 +1239,11 @@ function canSearch() {
     showToast('⚠ Recherche en cours, veuillez patienter...', true);
     return false;
   }
-  // Daily limit for Starter
+  // Daily limit for Starter — avant de bloquer, on revérifie EN DIRECT l'abonnement
+  // (un client Pro qui vient de payer ou de se connecter ne doit jamais être bloqué)
+  if (!userHasPro && searchCount >= 3) {
+    await refreshProStatus();
+  }
   if (!userHasPro && searchCount >= 3) {
     document.getElementById('limitBanner').style.display = 'flex';
     showToast('⚠ Limite de 3 recherches atteinte ! Passez au Pro.', true);
@@ -1328,7 +1343,7 @@ async function msSignup(e, priceId) {
   const PAID_PRICES = ['prc_starter-mw82039c', 'prc_pro-ei8103c9', 'prc_entreprise-ib6k0elp'];
   const PAID_PLANS  = ['pln_starter-2c70ujw', 'pln_pro-888003rj', 'pln_entreprise-237m0uzz'];
   const getActivePaid = (mem) => activePlans(mem && mem.planConnections).filter(p =>
-    PAID_PRICES.includes(p.priceId) || PAID_PLANS.includes(p.planId)
+    PAID_PRICES.includes(p.priceId) || PAID_PRICES.includes(p.payment && p.payment.priceId) || PAID_PLANS.includes(p.planId)
   );
   try {
     const { data: member } = await window.$memberstackDom.getCurrentMember({ useCache: false });
@@ -1338,7 +1353,8 @@ async function msSignup(e, priceId) {
       // (évite qu'un client paie 2 abonnements en même temps, ex. Entreprise + Pro)
       const activePaid = getActivePaid(member);
       if (activePaid.length > 0) {
-        if (activePaid.some(p => p.priceId === priceId)) {
+        const samePlan = { 'prc_starter-mw82039c': 'pln_starter-2c70ujw', 'prc_pro-ei8103c9': 'pln_pro-888003rj', 'prc_entreprise-ib6k0elp': 'pln_entreprise-237m0uzz' }[priceId];
+        if (activePaid.some(p => p.priceId === priceId || (p.payment && p.payment.priceId === priceId) || p.planId === samePlan)) {
           showToast('✓ Vous avez déjà cet abonnement', false);
         } else {
           showToast('ℹ Vous avez déjà un abonnement. Pour changer d\'offre, passez par "Mon compte".', true);
@@ -1383,10 +1399,8 @@ async function msSignup(e, priceId) {
             }
 
             if (plans.length > 0) {
-              const hasPro = plans.some(p => 
-                p.priceId === 'prc_pro-ei8103c9' || 
-                p.priceId === 'prc_entreprise-ib6k0elp'
-              );
+              const hasPro = plans.some(isProPlan);
+              applyProStatus(hasPro);
               _welcomeShown = true;
               showWelcomePopup(hasPro);
               autoCloseWelcome();
@@ -1452,14 +1466,10 @@ async function accessTool(tool) {
     
     // Check plan - status can be ACTIVE, active, or just exist
     const hasStarter = plans.some(p =>
-      p.priceId === 'prc_starter-mw82039c' || p.planId === 'pln_starter-2c70ujw'
+      p.priceId === 'prc_starter-mw82039c' || (p.payment && p.payment.priceId === 'prc_starter-mw82039c') || p.planId === 'pln_starter-2c70ujw'
     );
-    const hasPro = plans.some(p =>
-      p.priceId === 'prc_pro-ei8103c9' || 
-      p.priceId === 'prc_entreprise-ib6k0elp' ||
-      p.planId === 'pln_pro-888003rj' ||
-      p.planId === 'pln_entreprise-237m0uzz'
-    );
+    const hasPro = plans.some(isProPlan);
+    applyProStatus(hasPro);
     const hasAnyActivePlan = hasStarter || hasPro || plans.length > 0;
 
     if (tool === 'finder') {
@@ -1506,7 +1516,7 @@ let tfResults = [], tfLat = null, tfLng = null, tfLabel = '';
 function km(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180;const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2;return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))*10)/10;}
 
 async function tfSearch() {
-  if (!canSearch()) return;
+  if (!(await canSearch())) return;
   const city = document.getElementById('tfCityInput').value.trim();
   const radius = parseInt(document.getElementById('tfRadius').value);
   if (!city && tfLat === null) { showToast('⚠ Entrez une ville !', true); return; }
@@ -1748,7 +1758,7 @@ function setFilter(btn, filter) {
 
 async function tfSearchWithFilter() {
   // Un filtre relance une vraie recherche Google : même limite que tfSearch (3/jour en Starter)
-  if (!canSearch()) { tfRenderCards(); return; }
+  if (!(await canSearch())) { tfRenderCards(); return; }
   isSearching = true;
   const radius = parseInt(document.getElementById('tfRadius').value);
   const queries = filterQueries[activeFilter] || filterQueries[''];
@@ -1994,6 +2004,8 @@ async function _checkAuthState() {
     let m = await window.$memberstackDom.getCurrentMember({ useCache: false });
     let plans = (m && m.data) ? activePlans(m.data.planConnections) : [];
     const state = (m && m.data) ? (m.data.id || 'logged_in') : 'logged_out';
+    // Statut Pro toujours synchronisé (connexion après chargement, paiement récent…)
+    applyProStatus(plans.some(isProPlan));
     
     if (_msState !== 'unknown' && _msState !== state) {
       if (state !== 'logged_out') {
@@ -2012,12 +2024,8 @@ async function _checkAuthState() {
 
         const hasActivePlan = plans.length > 0;
         if (hasActivePlan && !_welcomeShown) {
-          const hasPro = plans.some(p =>
-            p.priceId === 'prc_pro-ei8103c9' ||
-            p.priceId === 'prc_entreprise-ib6k0elp' ||
-            p.planId === 'pln_pro-888003rj' ||
-            p.planId === 'pln_entreprise-237m0uzz'
-          );
+          const hasPro = plans.some(isProPlan);
+          applyProStatus(hasPro);
           _welcomeShown = true;
           showWelcomePopup(hasPro);
           autoCloseWelcome();
@@ -2033,7 +2041,8 @@ async function _checkAuthState() {
     
     // Also show welcome after fresh payment (URL contains fromCheckout)
     if (!_welcomeShown && window.location.search.includes('fromCheckout') && m && m.data && plans.length > 0) {
-      const hasPro = plans.some(p => p.priceId === 'prc_pro-ei8103c9' || p.priceId === 'prc_entreprise-ib6k0elp');
+      const hasPro = plans.some(isProPlan);
+      applyProStatus(hasPro);
       _welcomeShown = true;
       await checkMember();
       showWelcomePopup(hasPro);
