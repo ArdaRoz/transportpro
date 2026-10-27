@@ -497,6 +497,299 @@ button,select,input{font-family:inherit;cursor:pointer}
   .nav-login{padding:6px 10px;font-size:.72rem}
   .price-amount{font-size:2rem}
 }
+/* ══ ACCUEIL v2 (hero + outils) ══ */
+.hx{position:relative;overflow:hidden;padding:60px 0 60px;min-height:calc(88vh - 60px);display:flex;align-items:center}
+.hx::before{content:'';position:absolute;inset:0;background:radial-gradient(60% 55% at 78% 45%,rgba(255,92,0,.13),transparent 70%);pointer-events:none}
+.hx-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center;position:relative;z-index:2;width:100%}
+.hx-eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:.78rem;color:var(--gray-400);margin-bottom:26px;animation:fadeUp .6s .1s both}
+.hx-dot{width:7px;height:7px;border-radius:2px;background:var(--orange);box-shadow:0 0 12px var(--orange)}
+.hx-title{font-size:clamp(2.4rem,4.1vw,3.8rem);font-weight:800;line-height:1.02;letter-spacing:-.045em;margin-bottom:26px;animation:fadeUp .6s .2s both}
+.hx-title .hl{color:var(--orange)}
+.hx-sub{font-size:1.08rem;color:var(--gray-400);line-height:1.65;max-width:520px;margin-bottom:34px;animation:fadeUp .6s .3s both}
+.hx-btns{display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin-bottom:40px;animation:fadeUp .6s .4s both}
+.hx-btns .btn{border-radius:999px;padding-left:28px;padding-right:28px}
+.hx-link{color:var(--white);font-weight:600;font-size:.95rem;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:2px}
+.hx-link:hover{border-color:var(--orange);color:var(--orange)}
+.hx-proof{font-size:.85rem;color:var(--gray-400);animation:fadeUp .6s .5s both}
+.hx-proof strong{color:var(--white)}
+/* visuel */
+.hx-visual{position:relative;height:600px;perspective:1400px;animation:fadeUp .8s .3s both}
+.hx-floor{position:absolute;left:-10%;right:-25%;bottom:-40px;height:300px;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:46px 46px;transform:rotateX(68deg);transform-origin:bottom;-webkit-mask-image:radial-gradient(70% 90% at 50% 100%,#000 30%,transparent 75%);mask-image:radial-gradient(70% 90% at 50% 100%,#000 30%,transparent 75%)}
+.hx-ring{position:absolute;left:50%;top:50%;width:440px;height:440px;margin:-220px 0 0 -250px;border-radius:50%;border:22px solid rgba(255,92,0,.85);box-shadow:0 0 60px rgba(255,92,0,.55),inset 0 0 60px rgba(255,92,0,.45);filter:blur(1px);opacity:.55;animation:hxSpin 14s linear infinite}
+@keyframes hxSpin{to{transform:rotate(360deg)}}
+.hx-phone{position:absolute;left:50%;top:50%;width:250px;height:510px;margin:-255px 0 0 -170px;border-radius:44px;background:#0b0b0b;box-shadow:inset 0 0 0 2px #2c2c2c,inset 0 0 0 8px #050505,0 40px 90px rgba(0,0,0,.7),0 0 0 1px #3b3b3b;transform:rotateY(-14deg) rotateX(6deg) rotateZ(-2deg);animation:hxFloat 7s ease-in-out infinite;z-index:3}
+@keyframes hxFloat{0%,100%{transform:rotateY(-14deg) rotateX(6deg) rotateZ(-2deg) translateY(0)}50%{transform:rotateY(-10deg) rotateX(4deg) rotateZ(-1deg) translateY(-12px)}}
+.hx-island{position:absolute;left:50%;top:16px;width:74px;height:22px;margin-left:-37px;border-radius:14px;background:#000;z-index:2}
+.hx-app{position:absolute;inset:9px;border-radius:36px;overflow:hidden;background:linear-gradient(180deg,#141414,#0d0d0d);padding:44px 14px 14px;font-size:11px}
+.hx-app-top{position:absolute;top:13px;left:22px;right:22px;display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:#ddd}
+.hx-app-title{font-weight:700;font-size:15px;margin-bottom:12px;letter-spacing:-.02em}
+.hx-search{display:flex;justify-content:space-between;background:#1c1c1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 11px;margin-bottom:7px;font-weight:600}
+.hx-km{color:var(--gray-400)}
+.hx-go{background:var(--orange);border-radius:10px;text-align:center;padding:9px;font-weight:700;margin-bottom:14px}
+.hx-count{font-weight:600;color:#ddd;margin-bottom:10px}
+.hx-count b{color:var(--orange)}
+.hx-res{display:flex;align-items:center;gap:9px;background:#181818;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:9px;margin-bottom:7px}
+.hx-res.dim{opacity:.45}
+.hx-av{width:30px;height:30px;border-radius:8px;background:#232323;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.hx-lines{flex:1;min-width:0}
+.hx-lines i{display:block;height:7px;border-radius:4px;background:rgba(255,255,255,.22);margin-bottom:5px}
+.hx-lines i.sm{height:5px;background:rgba(255,255,255,.1)}
+.hx-meta{font-size:9.5px;color:var(--orange);font-weight:600}
+.hx-call{width:28px;height:28px;border-radius:8px;background:rgba(0,200,150,.12);border:1px solid rgba(0,200,150,.3);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.hx-pill{position:absolute;left:4%;top:4%;padding:12px 22px;border-radius:999px;background:rgba(235,235,235,.92);color:#111;font-weight:700;font-size:1.05rem;box-shadow:0 20px 50px rgba(0,0,0,.5);transform:rotate(-4deg);z-index:4;animation:hxPill 6s ease-in-out infinite}
+@keyframes hxPill{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(-3deg) translateY(-8px)}}
+.hx-examples{position:absolute;right:-2%;top:12%;width:290px;z-index:5}
+.hx-ex-label{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-400);text-align:right;margin-bottom:10px}
+.hx-ex{display:flex;align-items:center;gap:12px;background:rgba(20,20,20,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:11px 14px;margin-bottom:9px;box-shadow:0 18px 40px rgba(0,0,0,.45);animation:hxEx .7s var(--d) both}
+@keyframes hxEx{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.hx-ok{width:26px;height:26px;border-radius:7px;background:rgba(0,200,150,.14);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0}
+.hx-ex div{flex:1;min-width:0}
+.hx-ex b{display:block;font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hx-ex small{display:block;font-size:.68rem;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hx-ex em{font-style:normal;font-weight:800;font-size:.95rem;white-space:nowrap}
+/* outils */
+.bx{padding:100px 0;border-top:1px solid rgba(255,255,255,.06)}
+.bx-head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-bottom:44px;flex-wrap:wrap}
+.bx-title{font-size:clamp(2rem,4vw,3.2rem);font-weight:800;letter-spacing:-.04em;line-height:1.05}
+.bx-intro{max-width:380px;color:var(--gray-400);font-size:.95rem;line-height:1.65}
+.bx-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.bx-card{background:var(--bg2);border:1px solid var(--border);border-radius:22px;overflow:hidden;cursor:pointer;transition:transform .25s ease,border-color .25s ease}
+.bx-card:hover{transform:translateY(-4px);border-color:rgba(255,92,0,.35)}
+.bx-card:hover .bx-go{gap:10px}
+.bx-wide{grid-column:1/-1}
+.bx-vis{position:relative;height:260px;overflow:hidden;background:radial-gradient(70% 90% at 50% 100%,rgba(255,92,0,.16),transparent 70%),#0c0c0c;border-bottom:1px solid var(--border)}
+.bx-wide .bx-vis{height:300px}
+.bx-txt{display:flex;gap:16px;align-items:flex-start;padding:24px 26px 26px;position:relative}
+.bx-num{font-family:var(--font-mono);font-size:.78rem;color:var(--orange);padding-top:4px}
+.bx-txt h3{font-size:1.2rem;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.bx-txt p{font-size:.9rem;color:var(--gray-400);line-height:1.6;margin-bottom:14px;max-width:560px}
+.bx-go{display:inline-flex;gap:6px;color:var(--orange);font-weight:700;font-size:.9rem;transition:gap .2s}
+.bx-tag{position:absolute;right:24px;top:26px}
+.bx-map{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:40px 40px}
+.bx-map span{position:absolute;width:12px;height:12px;margin:-6px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 6px rgba(255,92,0,.18);animation:bxPing 2.6s ease-out infinite}
+.bx-map span:nth-child(2n){animation-delay:.8s}.bx-map span:nth-child(3n){animation-delay:1.5s}
+.bx-map span.me{width:18px;height:18px;margin:-9px;background:#fff;box-shadow:0 0 0 10px rgba(255,255,255,.12),0 0 30px rgba(255,255,255,.4);animation:none}
+@keyframes bxPing{0%{box-shadow:0 0 0 0 rgba(255,92,0,.5)}70%{box-shadow:0 0 0 16px rgba(255,92,0,0)}100%{box-shadow:0 0 0 0 rgba(255,92,0,0)}}
+.bx-filters{position:absolute;left:24px;bottom:22px;display:flex;gap:8px;flex-wrap:wrap}
+.bx-filters span{padding:8px 14px;border-radius:999px;background:rgba(22,22,22,.92);border:1px solid rgba(255,255,255,.1);font-size:.82rem;font-weight:600}
+.bx-filters span.on{background:var(--orange);border-color:var(--orange)}
+.bx-vis-rev{display:flex;align-items:flex-end;justify-content:space-between;padding:30px}
+.bx-big{font-size:2.8rem;font-weight:800;letter-spacing:-.04em;color:var(--green);line-height:1}
+.bx-big small{display:block;font-size:.72rem;font-weight:600;letter-spacing:0;color:var(--gray-400);margin-bottom:10px}
+.bx-bars{display:flex;align-items:flex-end;gap:8px;height:150px}
+.bx-bars i{width:18px;border-radius:6px 6px 2px 2px;background:rgba(255,255,255,.12)}
+.bx-bars i.on{background:var(--orange);box-shadow:0 0 24px rgba(255,92,0,.5)}
+.bx-vis-ch{display:flex;align-items:center;justify-content:center;padding:26px}
+.bx-rows{width:100%;max-width:330px;background:rgba(20,20,20,.9);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:8px 18px}
+.bx-rows div{display:flex;justify-content:space-between;padding:11px 0;font-size:.88rem;color:var(--gray-400);border-bottom:1px solid rgba(255,255,255,.06)}
+.bx-rows div:last-child{border:none}
+.bx-rows b{color:var(--white)}.bx-rows b.o{color:var(--orange)}
+.bx-rows .tot span{color:var(--white);font-weight:600}.bx-rows .tot b{color:var(--green);font-size:1rem}
+@media(max-width:1024px){
+  .hx{padding:50px 0 40px;min-height:auto}
+  .hx-grid{grid-template-columns:1fr;gap:10px}
+  .hx-visual{height:560px;max-width:560px;margin:0 auto;width:100%}
+}
+@media(max-width:640px){
+  .hx{padding:28px 0 20px}
+  .hx-eyebrow{font-size:.68rem}
+  .hx-btns{gap:18px}
+  .hx-visual{height:600px}
+  .hx-phone{width:210px;height:430px;margin:-215px 0 0 -105px;top:44%}
+  .hx-ring{width:320px;height:320px;margin:-160px 0 0 -160px;top:44%;border-width:16px}
+  .hx-pill{left:0;top:2%;font-size:.85rem;padding:9px 16px}
+  .hx-examples{left:0;right:0;top:auto;bottom:0;width:auto}
+  .hx-ex-label{text-align:left}
+  .bx{padding:70px 0}
+  .bx-grid{grid-template-columns:1fr}
+  .bx-vis,.bx-wide .bx-vis{height:220px}
+  .bx-txt{padding:20px 18px 22px;flex-direction:column;gap:6px}
+  .bx-tag{position:static;order:-1;align-self:flex-start}
+  .bx-vis-rev{padding:22px}.bx-big{font-size:2.2rem}.bx-bars{height:110px}
+}
+@media(prefers-reduced-motion:reduce){.hx-ring,.hx-phone,.hx-pill,.bx-map span{animation:none}}
+.bx-rows .lbl span{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase}
+/* ══ ACCUEIL v2 : animations ══ */
+.hx-board{position:absolute;right:-30%;top:-18%;width:560px;height:820px;transform:rotateX(52deg) rotateZ(-28deg) skewX(4deg);transform-origin:center;opacity:.5;-webkit-mask-image:radial-gradient(60% 55% at 50% 50%,#000 40%,transparent 80%);mask-image:radial-gradient(60% 55% at 50% 50%,#000 40%,transparent 80%);pointer-events:none}
+.hx-board-in{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;animation:hxBoard 26s linear infinite}
+
+@keyframes hxBoard{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+.hx-col{display:flex;flex-direction:column;gap:14px}
+.hx-tile{position:relative;height:74px;border-radius:12px;background:#151515;border:1px solid rgba(255,255,255,.06);padding:10px 12px;font-family:var(--font-mono)}
+.hx-tile small{display:block;font-size:.7rem;color:#666}
+.hx-tile b{font-size:1rem;color:#777;font-weight:600}
+.hx-tile.ok{background:linear-gradient(160deg,#ff7a2e,#e04e00);border-color:rgba(255,140,60,.6);box-shadow:0 10px 30px rgba(255,92,0,.25)}
+.hx-tile.ok small{color:rgba(0,0,0,.55)}.hx-tile.ok b{color:#1a0a00}
+.hx-tile i{position:absolute;right:12px;top:22px;font-style:normal;font-weight:900;color:#1a0a00;font-size:1.2rem}
+.hx-floor{animation:hxFloor 3s linear infinite}
+@keyframes hxFloor{from{background-position:0 0}to{background-position:0 46px}}
+.hx-shard{position:absolute;left:var(--x);top:var(--y);width:16px;height:9px;border-radius:2px;background:linear-gradient(90deg,#ff8a40,#ff5c00);box-shadow:0 0 14px rgba(255,92,0,.6);opacity:.85;transform:rotate(var(--r));animation:hxShard var(--t) ease-in-out infinite;z-index:2}
+@keyframes hxShard{0%,100%{transform:translate(0,0) rotate(var(--r))}50%{transform:translate(10px,-26px) rotate(calc(var(--r) + 120deg))}}
+.hx-ring{animation:hxSpin 14s linear infinite,hxPulse 4s ease-in-out infinite}
+@keyframes hxPulse{0%,100%{opacity:.5}50%{opacity:.75}}
+.hx-caret{display:inline-block;width:1.5px;height:11px;background:var(--orange);margin-left:2px;vertical-align:-1px;animation:hxBlink 1s steps(1) infinite}
+@keyframes hxBlink{50%{opacity:0}}
+.hx-go{transition:transform .15s,box-shadow .3s}
+.hx-go.press{transform:scale(.94);box-shadow:0 0 0 6px rgba(255,92,0,.25)}
+.hx-count{transition:opacity .4s}
+.hx-res{transition:opacity .45s ease,transform .45s cubic-bezier(.2,.8,.2,1)}
+.hx-anim .hx-res{opacity:0;transform:translateY(14px)}
+.hx-anim .hx-res.show{opacity:1;transform:none}
+.hx-anim .hx-res.dim.show{opacity:.45}
+.hx-anim .hx-count{opacity:0}.hx-anim .hx-count.show{opacity:1}
+.hx-call.ring-on{animation:hxCall 1s ease-in-out 2}
+@keyframes hxCall{0%,100%{transform:none;box-shadow:none}50%{transform:scale(1.15) rotate(-8deg);box-shadow:0 0 0 6px rgba(0,200,150,.15)}}
+.hx-pill{transition:opacity .4s,transform .5s cubic-bezier(.2,1.4,.4,1)}
+.hx-anim .hx-pill{opacity:0;transform:rotate(-4deg) translateY(10px) scale(.9);animation:none}
+.hx-anim .hx-pill.show{opacity:1;transform:rotate(-4deg) translateY(0) scale(1)}
+#hxFeed{position:relative;height:216px}
+#hxFeed .hx-ex{position:absolute;left:0;right:0;animation:none;transition:transform .7s cubic-bezier(.2,.8,.2,1),opacity .7s}
+.hx-title .w{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(18px);animation:hxWord .8s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes hxWord{to{opacity:1;filter:blur(0);transform:none}}
+/* outils : apparition au défilement */
+.bx-card{opacity:0;transform:translateY(40px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1),border-color .25s}
+.bx-card.in{opacity:1;transform:none}
+.bx-card.in:hover{transform:translateY(-4px)}
+.bx-card:nth-child(2){transition-delay:.12s}.bx-card:nth-child(3){transition-delay:.24s}
+.bx-bars i{transform:scaleY(.05);transform-origin:bottom;transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+.bx-card.in .bx-bars i{transform:scaleY(1)}
+.bx-card.in .bx-bars i:nth-child(2){transition-delay:.08s}.bx-card.in .bx-bars i:nth-child(3){transition-delay:.16s}.bx-card.in .bx-bars i:nth-child(4){transition-delay:.24s}.bx-card.in .bx-bars i:nth-child(5){transition-delay:.32s}.bx-card.in .bx-bars i:nth-child(6){transition-delay:.4s}
+.bx-rows>div{opacity:0;transform:translateX(-14px);transition:opacity .5s,transform .5s}
+.bx-card.in .bx-rows>div{opacity:1;transform:none}
+.bx-card.in .bx-rows>div:nth-child(2){transition-delay:.15s}.bx-card.in .bx-rows>div:nth-child(3){transition-delay:.3s}.bx-card.in .bx-rows>div:nth-child(4){transition-delay:.45s}.bx-card.in .bx-rows>div:nth-child(5){transition-delay:.6s}
+.bx-filters span{transition:background .3s,border-color .3s}
+.bx-map::after{content:'';position:absolute;left:44%;top:44%;width:10px;height:10px;margin:-5px;border-radius:50%;border:2px solid rgba(255,255,255,.5);animation:bxRadar 3s ease-out infinite}
+@keyframes bxRadar{from{transform:scale(1);opacity:.8}to{transform:scale(40);opacity:0}}
+@media(max-width:640px){.hx-board{right:-60%;top:-10%;opacity:.35}#hxFeed{height:200px}}
+@media(prefers-reduced-motion:reduce){.hx-board-in,.hx-floor,.hx-shard,.bx-map::after{animation:none}.hx-title .w{animation:none;opacity:1;filter:none;transform:none}.bx-card,.bx-rows>div,.bx-bars i{opacity:1;transform:none;transition:none}}
+/* ══ DÉMO PRODUIT ══ */
+.dm{padding:100px 0 90px;border-top:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden}
+.dm::before{content:'';position:absolute;left:50%;top:55%;width:900px;height:500px;margin-left:-450px;background:radial-gradient(closest-side,rgba(255,92,0,.12),transparent);pointer-events:none}
+.dm-tabs{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;position:relative}
+.dm-tab{position:relative;overflow:hidden;display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--gray-400);font:600 .9rem var(--font-b);cursor:pointer;transition:color .2s,border-color .2s}
+.dm-tab.on{color:var(--white);border-color:rgba(255,92,0,.45)}
+.dm-tn{font-family:var(--font-mono);font-size:.72rem;color:var(--orange)}
+.dm-tab i{position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--orange)}
+.dm-win{position:relative;border-radius:18px;background:#0e0e0e;border:1px solid rgba(255,255,255,.1);box-shadow:0 50px 120px rgba(0,0,0,.6),0 0 0 1px rgba(255,92,0,.06);overflow:hidden}
+.dm-bar{display:flex;align-items:center;gap:7px;padding:12px 16px;background:#161616;border-bottom:1px solid rgba(255,255,255,.06)}
+.dm-bar>span{width:11px;height:11px;border-radius:50%;background:#ff5f57}.dm-bar>span:nth-child(2){background:#febc2e}.dm-bar>span:nth-child(3){background:#28c840}
+.dm-url{margin-left:14px;flex:1;max-width:340px;background:#0e0e0e;border-radius:8px;padding:5px 12px;font-size:.75rem;color:var(--gray-400)}
+.dm-fict{margin-left:auto;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:rgba(255,92,0,.1);border:1px solid rgba(255,92,0,.25);padding:4px 9px;border-radius:999px}
+.dm-body{position:relative;height:600px;overflow:hidden}
+.dm-pane{position:absolute;inset:0;padding:26px 28px;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s;pointer-events:none}
+.dm-pane.on{opacity:1;transform:none}
+.dm-cursor{position:absolute;left:60%;top:70%;z-index:30;filter:drop-shadow(0 4px 8px rgba(0,0,0,.6));transition:left .7s cubic-bezier(.4,0,.2,1),top .7s cubic-bezier(.4,0,.2,1),transform .15s;pointer-events:none}
+.dm-cursor.click{transform:scale(.8)}
+.dm-ripple{position:absolute;width:40px;height:40px;margin:-20px;border-radius:50%;border:2px solid var(--orange);z-index:29;pointer-events:none;animation:dmRip .6s ease-out forwards}
+@keyframes dmRip{from{transform:scale(.3);opacity:1}to{transform:scale(1.6);opacity:0}}
+/* finder */
+.dm-fbar{display:grid;grid-template-columns:1fr 130px 170px;gap:10px;margin-bottom:12px}
+.dm-field{position:relative;display:flex;align-items:center;gap:8px;background:#171717;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:0 14px;height:48px;font-weight:600;font-size:1rem}
+.dm-city{border-color:rgba(255,92,0,.45);box-shadow:0 0 0 4px rgba(255,92,0,.08)}
+.dm-city em{position:absolute;left:40px;font-style:normal;font-weight:400;color:#555;font-size:.92rem;pointer-events:none}
+.dm-caret{width:2px;height:20px;background:var(--orange);margin-left:-6px;animation:hxBlink 1s steps(1) infinite}
+.dm-btn{display:flex;align-items:center;justify-content:center;background:var(--orange);border-radius:10px;font-weight:700;height:48px;transition:transform .15s}
+.dm-btn.press{transform:scale(.95)}
+.dm-chips{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.dm-chips span{padding:7px 13px;border-radius:999px;background:#171717;border:1px solid rgba(255,255,255,.08);font-size:.8rem;font-weight:600;color:#bbb;transition:background .25s,color .25s,border-color .25s}
+.dm-chips span.on{background:rgba(255,92,0,.12);border-color:rgba(255,92,0,.5);color:#fff}
+.dm-load{display:none;align-items:center;gap:10px;color:var(--gray-400);font-size:.9rem;margin:30px 0}
+.dm-load.on{display:flex}
+.dm-load i{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.15);border-top-color:var(--orange);animation:hxSpin .8s linear infinite}
+.dm-count{font-weight:700;margin-bottom:12px;min-height:22px}
+.dm-count b{color:var(--orange)}
+.dm-count small{color:var(--gray-400);font-weight:500;margin-left:6px}
+.dm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.dm-card{background:#151515;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px;opacity:0;transform:translateY(16px) scale(.98);transition:opacity .45s,transform .45s cubic-bezier(.2,.8,.2,1),border-color .3s}
+.dm-card.show{opacity:1;transform:none}
+.dm-card.hl{border-color:rgba(255,92,0,.6);box-shadow:0 0 0 3px rgba(255,92,0,.12)}
+.dm-ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.dm-av{width:30px;height:30px;border-radius:8px;background:#222;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.dm-op{font-size:.66rem;font-weight:700;color:var(--green);background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.25);border-radius:999px;padding:2px 8px}
+.dm-card b{display:block;font-size:.92rem;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-card small{display:block;color:var(--gray-400);font-size:.74rem;margin-bottom:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-cm{display:flex;justify-content:space-between;align-items:center;font-size:.76rem;border-top:1px solid rgba(255,255,255,.06);padding-top:8px}
+.dm-cm .st{color:#FFB800}.dm-cm .km{color:var(--orange);font-weight:700;background:rgba(255,92,0,.1);padding:2px 7px;border-radius:6px}
+.dm-ca{display:flex;gap:6px;margin-top:9px}
+.dm-ca span{flex:1;text-align:center;font-size:.72rem;font-weight:700;padding:6px;border-radius:8px;background:rgba(0,200,150,.1);color:var(--green);border:1px solid rgba(0,200,150,.2)}
+.dm-ca span+span{background:#1c1c1c;color:#bbb;border-color:rgba(255,255,255,.07)}
+.dm-modal{position:absolute;right:28px;top:22px;bottom:22px;width:330px;background:#141414;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:20px;box-shadow:-30px 0 80px rgba(0,0,0,.6);transform:translateX(120%);transition:transform .55s cubic-bezier(.2,.8,.2,1);z-index:20}
+.dm-modal.on{transform:none}
+.dm-mh{margin-bottom:14px}.dm-mh small{font-family:var(--font-mono);font-size:.6rem;color:var(--orange);letter-spacing:.1em}.dm-mh b{display:block;font-size:1.15rem;margin-top:4px}
+.dm-mr{display:flex;gap:12px;padding:10px 0;border-top:1px solid rgba(255,255,255,.06)}
+.dm-mr small{display:block;font-size:.66rem;color:#777;text-transform:uppercase;letter-spacing:.08em}.dm-mr b{font-size:.9rem}.dm-mr .am{color:#FFB800}.dm-mr .gr{color:var(--green)}
+.dm-call{margin-top:14px;text-align:center;background:var(--orange);border-radius:12px;padding:12px;font-weight:800;transition:transform .15s}
+.dm-call.pulse{animation:dmPulse 1s ease-in-out 3}
+@keyframes dmPulse{50%{box-shadow:0 0 0 10px rgba(255,92,0,.18);transform:scale(1.03)}}
+.dm-sec{display:flex;gap:8px;margin-top:8px}.dm-sec span{flex:1;text-align:center;padding:9px;border-radius:10px;background:#1c1c1c;font-size:.8rem;font-weight:600;color:#bbb}
+/* simulateurs */
+.dm-cols{display:grid;grid-template-columns:.9fr 1.1fr;gap:22px;height:100%}
+.dm-form{display:flex;flex-direction:column;gap:12px}
+.dm-flag{display:flex;gap:8px}.dm-flag span{padding:8px 14px;border-radius:10px;background:#171717;border:1px solid rgba(255,255,255,.08);font-size:.82rem;font-weight:600;color:#888}
+.dm-flag span.on{color:var(--orange);border-color:rgba(255,92,0,.45);background:rgba(255,92,0,.08)}
+.dm-form label{font-size:.8rem;color:var(--gray-400);font-weight:500}
+.dm-in{position:relative;margin-top:6px;height:46px;display:flex;align-items:center;justify-content:space-between;background:#171717;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:0 14px;transition:border-color .2s,box-shadow .2s}
+.dm-in.act{border-color:rgba(255,92,0,.5);box-shadow:0 0 0 4px rgba(255,92,0,.08)}
+.dm-in b{color:var(--orange);font-size:1.02rem;min-width:2px}
+.dm-in em{font-style:normal;font-family:var(--font-mono);font-size:.74rem;color:#666}
+.dm-seg{display:flex;gap:6px;margin-top:6px}.dm-seg span{flex:1;text-align:center;padding:11px 4px;border-radius:10px;background:#171717;border:1px solid rgba(255,255,255,.08);font-size:.82rem;font-weight:600;color:#999;transition:all .25s}
+.dm-seg span.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.dm-out{background:linear-gradient(160deg,rgba(0,200,150,.06),rgba(0,0,0,0) 60%),#121212;border:1px solid rgba(0,200,150,.18);border-radius:16px;padding:22px 24px}
+.dm-out>small{color:var(--gray-400);font-size:.82rem;font-weight:500}
+.dm-net{font-size:3.4rem;font-weight:800;letter-spacing:-.04em;color:var(--green);line-height:1.1;margin:4px 0 14px}
+.dm-wf>div{display:flex;justify-content:space-between;padding:8px 0;font-size:.9rem;color:var(--gray-400);border-bottom:1px solid rgba(255,255,255,.05);opacity:0;transform:translateX(-10px);transition:opacity .4s,transform .4s}
+.dm-wf>div.show{opacity:1;transform:none}
+.dm-wf b{color:#fff}.dm-wf b.o{color:var(--orange)}.dm-wf b.g{color:var(--green)}
+.dm-wf .t span{color:#fff;font-weight:700}
+.dm-seuil{margin-top:14px;font-size:.78rem;color:var(--gray-400)}
+.dm-seuil div{height:7px;border-radius:99px;background:#222;margin:7px 0;overflow:hidden}
+.dm-seuil i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--orange),#FFB800);transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.dm-seuil small{color:var(--green);font-weight:700;font-size:.8rem;opacity:0;transition:opacity .4s}
+.dm-split{display:flex;height:14px;border-radius:99px;overflow:hidden;background:#222;margin-bottom:10px}
+.dm-split i{display:block;height:100%;width:0;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.dm-split.on i{width:var(--w)}
+.dm-split .a,.dm-leg .a{background:var(--green)}.dm-split .b,.dm-leg .b{background:#4A9EFF}.dm-split .c,.dm-leg .c{background:var(--orange)}
+.dm-leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.74rem;color:var(--gray-400);margin-bottom:10px}
+.dm-leg span{display:inline-flex;align-items:center;gap:6px}.dm-leg i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.dm-note{margin-top:14px;font-size:.78rem;color:#666;text-align:center}
+@media(max-width:900px){
+  .dm-grid{grid-template-columns:1fr 1fr}
+  .dm-grid .dm-card:nth-child(n+5){display:none}
+  .dm-modal{width:auto;left:16px;right:16px;top:auto;bottom:16px;height:auto;transform:translateY(120%)}
+}
+@media(max-width:640px){
+  .dm{padding:70px 0 60px}
+  .dm-tabs{flex-wrap:nowrap;overflow-x:auto;gap:8px;scrollbar-width:none}
+  .dm-tab{flex-shrink:0;padding:10px 13px;font-size:.8rem}
+  .dm-body{height:600px}
+  .dm-pane{padding:16px}
+  .dm-fbar{grid-template-columns:1fr 1fr}.dm-city{grid-column:1/-1}
+  .dm-field,.dm-btn{height:44px}
+  .dm-chips span:nth-child(n+4){display:none}
+  .dm-grid{grid-template-columns:1fr;gap:8px}
+  .dm-grid .dm-card:nth-child(n+4){display:none}
+  .dm-card{padding:11px}.dm-ca{display:none}
+  .dm-cols{grid-template-columns:1fr;gap:12px}
+  .dm-form{gap:8px}.dm-in{height:40px}.dm-flag span{padding:6px 10px}
+  .dm-form label:nth-of-type(4){display:none}
+  .dm-out{padding:16px}.dm-net{font-size:2.4rem;margin-bottom:8px}
+  .dm-wf>div{padding:5px 0;font-size:.8rem}
+  .dm-seuil{display:none}
+  .dm-fict{display:none}
+}
+.hx-n{display:block;font-size:10.5px;font-weight:700;color:#eee;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ══ NAV mobile : boutons sur une ligne, burger toujours visible ══ */
+@media(max-width:768px){
+  .nav{padding:0 12px}
+  .nav-inner{padding:0!important;gap:8px}
+  .nav-login{padding:7px 10px!important;font-size:.75rem!important;margin-right:0!important;white-space:nowrap}
+  .nav-cta{white-space:nowrap}
+  .nav-burger{flex-shrink:0;padding:8px}
+}
+@media(max-width:400px){
+  .nav-logo{font-size:0;gap:0}
+  .nav-logo-icon{width:28px;height:28px}
+}
 </style>
 </head>
 <body>
@@ -524,7 +817,7 @@ button,select,input{font-family:inherit;cursor:pointer}
       Transport<strong>Pro</strong>
     </div>
     <div class="nav-links">
-      <button class="nav-link" onclick="scrollToPricing()">Nos outils</button>
+      <button class="nav-link" onclick="showPage('landing');setTimeout(()=>{const o=document.getElementById('outils');if(o)o.scrollIntoView({behavior:'smooth'})},120)">Nos outils</button>
       <button class="nav-link" onclick="scrollToPricing()">Tarifs</button>
       <button class="nav-link" onclick="showPage('faq')">FAQ</button>
       <button class="nav-link" onclick="showPage('apropos')">À propos</button>
@@ -554,54 +847,167 @@ button,select,input{font-family:inherit;cursor:pointer}
 <!-- LANDING -->
 <div id="page-landing" class="page active">
 
-  <section class="hero">
-    <div class="container">
-      <div class="hero-inner">
-        <div class="hero-badge">🇫🇷 France · 🇧🇪 Belgique · Données Google en temps réel</div>
-        <h1>L'outil indispensable du<br/><span class="grad-text">chauffeur indépendant</span></h1>
-        <p class="hero-sub">Trouvez des sociétés de transport, calculez vos revenus nets et simulez vos charges salariales. Tout en un seul endroit.</p>
-        <div class="hero-btns">
+  <section class="hx">
+    <div class="container hx-grid">
+      <div class="hx-copy">
+        <div class="hx-eyebrow"><span class="hx-dot"></span>Pour les chauffeurs indépendants · France &amp; Belgique</div>
+        <h1 class="hx-title" id="hxTitle">Trouvez vos prochaines missions<br/><span class="hl">en quelques secondes.</span></h1>
+        <p class="hx-sub">Toutes les sociétés de transport autour de vous, avec téléphone, adresse et site web. Plus vos simulateurs de revenus et de charges. Tout au même endroit.</p>
+        <div class="hx-btns">
           <button class="btn btn-primary btn-lg" onclick="scrollToPricing()">Voir les offres →</button>
-          <button class="btn btn-outline btn-lg" onclick="scrollToPricing()">Choisir mon plan</button>
+          <a class="hx-link" href="#" onclick="event.preventDefault();document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Voir la démo ↓</a>
         </div>
-        <div class="hero-proof">
-          <div class="proof-item"><div class="proof-dot"></div>Données Google Places réelles</div>
-          <div class="hero-line"></div>
-          <div class="proof-item"><div class="proof-dot"></div>France & Belgique</div>
-          <div class="hero-line"></div>
-          <div class="proof-item"><div class="proof-dot"></div>Paiement sécurisé Stripe</div>
-          <div class="hero-line"></div>
-          <div class="proof-item"><div class="proof-dot"></div>Annulez à tout moment</div>
+        <div class="hx-proof"><strong>Données Google</strong> en temps réel · Sans engagement · Paiement sécurisé Stripe</div>
+      </div>
+
+      <div class="hx-visual" aria-hidden="true">
+        <div class="hx-board"><div class="hx-board-in"><div class="hx-col"><div class="hx-tile ok"><small>08:00</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>09:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>11:00</small><b>Mission</b><i>✓</i></div><div class="hx-tile ok"><small>13:30</small><b>Mission</b><i>✓</i></div><div class="hx-tile ok"><small>08:00</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>09:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>11:00</small><b>Mission</b><i>✓</i></div><div class="hx-tile ok"><small>13:30</small><b>Mission</b><i>✓</i></div><div class="hx-tile ok"><small>08:00</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>09:30</small><b>Appelé</b><i>✓</i></div></div><div class="hx-col"><div class="hx-tile "><small>10:30</small><b>Rappeler</b></div><div class="hx-tile ok"><small>13:00</small><b>RDV</b><i>✓</i></div><div class="hx-tile ok"><small>14:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>09:00</small><b>Mission</b><i>✓</i></div><div class="hx-tile "><small>10:30</small><b>Rappeler</b></div><div class="hx-tile ok"><small>13:00</small><b>RDV</b><i>✓</i></div><div class="hx-tile ok"><small>14:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>09:00</small><b>Mission</b><i>✓</i></div><div class="hx-tile "><small>10:30</small><b>Rappeler</b></div><div class="hx-tile ok"><small>13:00</small><b>RDV</b><i>✓</i></div></div><div class="hx-col"><div class="hx-tile "><small>14:00</small><b>Rappeler</b></div><div class="hx-tile "><small>08:30</small><b>Rappeler</b></div><div class="hx-tile ok"><small>10:00</small><b>Devis</b><i>✓</i></div><div class="hx-tile ok"><small>11:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile "><small>14:00</small><b>Rappeler</b></div><div class="hx-tile "><small>08:30</small><b>Rappeler</b></div><div class="hx-tile ok"><small>10:00</small><b>Devis</b><i>✓</i></div><div class="hx-tile ok"><small>11:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile "><small>14:00</small><b>Rappeler</b></div><div class="hx-tile "><small>08:30</small><b>Rappeler</b></div></div><div class="hx-col"><div class="hx-tile ok"><small>08:00</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>09:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>11:00</small><b>Mission</b><i>✓</i></div><div class="hx-tile ok"><small>13:30</small><b>Mission</b><i>✓</i></div><div class="hx-tile ok"><small>08:00</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>09:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>11:00</small><b>Mission</b><i>✓</i></div><div class="hx-tile ok"><small>13:30</small><b>Mission</b><i>✓</i></div><div class="hx-tile ok"><small>08:00</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>09:30</small><b>Appelé</b><i>✓</i></div></div><div class="hx-col"><div class="hx-tile "><small>10:30</small><b>Rappeler</b></div><div class="hx-tile ok"><small>13:00</small><b>RDV</b><i>✓</i></div><div class="hx-tile ok"><small>14:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>09:00</small><b>Mission</b><i>✓</i></div><div class="hx-tile "><small>10:30</small><b>Rappeler</b></div><div class="hx-tile ok"><small>13:00</small><b>RDV</b><i>✓</i></div><div class="hx-tile ok"><small>14:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile ok"><small>09:00</small><b>Mission</b><i>✓</i></div><div class="hx-tile "><small>10:30</small><b>Rappeler</b></div><div class="hx-tile ok"><small>13:00</small><b>RDV</b><i>✓</i></div></div><div class="hx-col"><div class="hx-tile "><small>14:00</small><b>Rappeler</b></div><div class="hx-tile "><small>08:30</small><b>Rappeler</b></div><div class="hx-tile ok"><small>10:00</small><b>Devis</b><i>✓</i></div><div class="hx-tile ok"><small>11:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile "><small>14:00</small><b>Rappeler</b></div><div class="hx-tile "><small>08:30</small><b>Rappeler</b></div><div class="hx-tile ok"><small>10:00</small><b>Devis</b><i>✓</i></div><div class="hx-tile ok"><small>11:30</small><b>Appelé</b><i>✓</i></div><div class="hx-tile "><small>14:00</small><b>Rappeler</b></div><div class="hx-tile "><small>08:30</small><b>Rappeler</b></div></div></div></div>
+        <div class="hx-floor"></div>
+        <div class="hx-ring"></div>
+        <span class="hx-shard" style="--x:8%;--y:70%;--r:24deg;--t:7s"></span><span class="hx-shard" style="--x:22%;--y:18%;--r:-30deg;--t:9s"></span><span class="hx-shard" style="--x:88%;--y:82%;--r:50deg;--t:8s"></span><span class="hx-shard" style="--x:64%;--y:8%;--r:12deg;--t:10s"></span><span class="hx-shard" style="--x:40%;--y:90%;--r:-12deg;--t:6.5s"></span><span class="hx-shard" style="--x:96%;--y:40%;--r:70deg;--t:11s"></span>
+        <div class="hx-pill" id="hxPill">✓ Société trouvée</div>
+
+        <div class="hx-phone">
+          <div class="hx-island"></div>
+          <div class="hx-app">
+            <div class="hx-app-top"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="hx-app-title">🔍 TransportFinder</div>
+            <div class="hx-search"><span>📍 <span id="hxCity">Lyon</span><span class="hx-caret"></span></span><span class="hx-km">25 km</span></div>
+            <div class="hx-go" id="hxGo">Rechercher</div>
+            <div class="hx-count" id="hxCountRow"><b id="hxCount">30</b> sociétés trouvées</div>
+            <div class="hx-res"><div class="hx-av">🏢</div><div class="hx-lines"><b class="hx-n">Rhône Fret Express</b><i class="sm" style="width:55%"></i><span class="hx-meta">★ 4.6 · 1,2 km</span></div><div class="hx-call">📞</div></div>
+            <div class="hx-res"><div class="hx-av">🏢</div><div class="hx-lines"><b class="hx-n">Saône Logistique</b><i class="sm" style="width:70%"></i><span class="hx-meta">★ 4.2 · 2,8 km</span></div><div class="hx-call">📞</div></div>
+            <div class="hx-res"><div class="hx-av">🏢</div><div class="hx-lines"><b class="hx-n">Confluence Messagerie</b><i class="sm" style="width:48%"></i><span class="hx-meta">★ 4.8 · 3,4 km</span></div><div class="hx-call">📞</div></div>
+            <div class="hx-res dim"><div class="hx-av">🏢</div><div class="hx-lines"><b class="hx-n">Monts d'Or Transports</b><i class="sm" style="width:62%"></i></div><div class="hx-call">📞</div></div>
+          </div>
+        </div>
+
+        <div class="hx-examples">
+          <div class="hx-ex-label">Exemples de résultats</div>
+          <div id="hxFeed"></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section style="background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.06);padding:60px 0">
+  <section class="dm" id="demo">
     <div class="container">
-      <div class="section-header">
-        <div class="section-tag">3 outils puissants</div>
-        <h2 class="section-title">Tout ce dont vous avez besoin</h2>
-        <p class="section-sub">Une plateforme complète pour gérer votre activité de chauffeur indépendant.</p>
+      <div class="bx-head">
+        <h2 class="bx-title">Voyez-le<br/>en action.</h2>
+        <p class="bx-intro">Une ville, un clic, et toutes les sociétés de transport autour de vous. Puis vos chiffres, calculés en quelques secondes.</p>
       </div>
-      <div class="tools-grid">
-        <div class="tool-card" onclick="accessTool('finder')">
-          <div class="tool-icon tool-icon-blue">🔍</div>
-          <h3>TransportFinder</h3>
-          <p>Trouvez des sociétés de transport près de vous. Données réelles Google, distances, téléphones, sites web.</p>
-          <span class="tool-tag tool-tag-starter">Starter & Pro</span>
+      <div class="dm-tabs" role="tablist">
+        <button class="dm-tab on" data-tab="0"><span class="dm-tn">01</span>TransportFinder<i></i></button>
+        <button class="dm-tab" data-tab="1"><span class="dm-tn">02</span>Simulateur de revenus<i></i></button>
+        <button class="dm-tab" data-tab="2"><span class="dm-tn">03</span>Simulateur de charges<i></i></button>
+      </div>
+      <div class="dm-win" aria-hidden="true">
+        <div class="dm-bar"><span></span><span></span><span></span><div class="dm-url">🔒 transportpro.pro</div><div class="dm-fict">Démo · données fictives</div></div>
+        <div class="dm-body">
+          <svg class="dm-cursor" id="dmCursor" viewBox="0 0 24 24" width="22" height="22"><path d="M3 2l7 19 2.6-7.4L20 11z" fill="#fff" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/></svg>
+
+          <!-- 01 FINDER -->
+          <div class="dm-pane on" data-pane="0">
+            <div class="dm-fbar">
+              <div class="dm-field dm-city"><span>📍</span><span id="dmCity"></span><span class="dm-caret"></span><em id="dmPh">Ville (ex : Bruxelles, Paris, Lyon…)</em></div>
+              <div class="dm-field dm-rad"><span>📏</span>25 km</div>
+              <div class="dm-btn" id="dmGo">🔍 Rechercher</div>
+            </div>
+            <div class="dm-chips" id="dmChips"><span class="on">🔍 Tous</span><span>⚡ Express</span><span data-k="frigo">❄️ Frigo &amp; Médical</span><span>🌙 Nuit</span><span>🌍 International</span></div>
+            <div class="dm-load" id="dmLoad"><i></i>Connexion à Google Places…</div>
+            <div class="dm-count" id="dmCount"></div>
+            <div class="dm-grid" id="dmGrid"></div>
+            <div class="dm-modal" id="dmModal">
+              <div class="dm-mh"><small>SOCIÉTÉ DE TRANSPORT · EXEMPLE</small><b id="dmMName"></b></div>
+              <div class="dm-mr"><span>📍</span><div><small>Adresse</small><b id="dmMAddr"></b></div></div>
+              <div class="dm-mr"><span>📞</span><div><small>Téléphone</small><b>04 •• •• •• ••</b></div></div>
+              <div class="dm-mr"><span>⭐</span><div><small>Note Google</small><b class="am" id="dmMRate"></b></div></div>
+              <div class="dm-mr"><span>🕐</span><div><small>Statut</small><b class="gr">Ouvert maintenant</b></div></div>
+              <div class="dm-call" id="dmCall">📞 Appeler</div>
+              <div class="dm-sec"><span>🌐 Site web</span><span>🗺 Maps</span></div>
+            </div>
+          </div>
+
+          <!-- 02 REVENUS -->
+          <div class="dm-pane" data-pane="1">
+            <div class="dm-cols">
+              <div class="dm-form">
+                <div class="dm-flag"><span class="on">🇧🇪 Belgique</span><span>🇫🇷 France</span></div>
+                <label>Tarif par livraison<div class="dm-in"><b data-v="8"></b><em>€ / livr.</em></div></label>
+                <label>Livraisons / jour<div class="dm-in"><b data-v="25"></b><em>livr./jour</em></div></label>
+                <label>Jours travaillés / mois<div class="dm-in"><b data-v="22"></b><em>jours</em></div></label>
+                <label>Charges mensuelles<div class="dm-in"><b data-v="650"></b><em>€ / mois</em></div></label>
+              </div>
+              <div class="dm-out">
+                <small>Revenu net mensuel estimé</small>
+                <div class="dm-net"><span id="dmNet">0</span> €</div>
+                <div class="dm-wf">
+                  <div><span>Chiffre d'affaires</span><b>4 400 €</b></div>
+                  <div><span>− Charges</span><b class="o">650 €</b></div>
+                  <div><span>= Bénéfice</span><b>3 750 €</b></div>
+                  <div><span>− Cotisations sociales</span><b class="o">769 €</b></div>
+                  <div class="t"><span>= Revenu net</span><b class="g">2 981 €</b></div>
+                </div>
+                <div class="dm-seuil"><span>Seuil de rentabilité</span><div><i id="dmSeuil"></i></div><small id="dmSeuilTxt"></small></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 03 CHARGES -->
+          <div class="dm-pane" data-pane="2">
+            <div class="dm-cols">
+              <div class="dm-form">
+                <div class="dm-flag"><span>🇧🇪 Belgique</span><span class="on">🇫🇷 France</span></div>
+                <label>Type de contrat<div class="dm-seg" id="dmSeg"><span>CDI</span><span>CDD</span><span>Intérim</span><span>Alternance</span></div></label>
+                <label>Salaire brut mensuel<div class="dm-in"><b data-v="2 500"></b><em>€ brut</em></div></label>
+                <label>Temps de travail<div class="dm-in"><b data-v="Temps plein"></b><em></em></div></label>
+              </div>
+              <div class="dm-out">
+                <small>Coût employeur total</small>
+                <div class="dm-net"><span id="dmCost">0</span> €</div>
+                <div class="dm-split" id="dmSplit"><i class="a" style="--w:54%"></i><i class="b" style="--w:17.2%"></i><i class="c" style="--w:28.7%"></i></div>
+                <div class="dm-leg"><span><i class="a"></i>Salaire net 1 895 €</span><span><i class="b"></i>Charges salariales 605 €</span><span><i class="c"></i>Charges patronales 1 008 €</span></div>
+                <div class="dm-wf">
+                  <div><span>Salaire brut</span><b>2 500 €</b></div>
+                  <div><span>Salaire net estimé</span><b>1 895 €</b></div>
+                  <div><span>Charges patronales</span><b class="o">+ 1 008 €</b></div>
+                  <div class="t"><span>Coût employeur total</span><b class="g">3 508 €</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="tool-card" onclick="accessTool('revenus')">
-          <div class="tool-icon tool-icon-amber">💰</div>
-          <h3>Simulateur de Revenus</h3>
-          <p>Calculez votre revenu net en tant qu'indépendant. Seuil de rentabilité, cotisations sociales FR & BE.</p>
-          <span class="tool-tag tool-tag-pro">Plan Pro uniquement</span>
+      </div>
+      <p class="dm-note">Démonstration avec des sociétés et des chiffres fictifs. Dans l'outil, les résultats viennent de Google Places et de vos propres données.</p>
+    </div>
+  </section>
+
+  <section class="bx" id="outils">
+    <div class="container">
+      <div class="bx-head">
+        <h2 class="bx-title">Trois outils pour<br/>développer votre activité.</h2>
+        <p class="bx-intro">Trouvez des donneurs d'ordre, sachez ce que vous gagnez vraiment et ce que coûte un salarié. Pensé pour les chauffeurs de camionnettes et de poids lourds.</p>
+      </div>
+      <div class="bx-grid">
+        <div class="bx-card bx-wide" onclick="accessTool('finder')">
+          <div class="bx-vis bx-vis-finder">
+            <div class="bx-map"><span style="left:18%;top:30%"></span><span style="left:34%;top:62%"></span><span style="left:52%;top:24%"></span><span style="left:63%;top:55%"></span><span style="left:78%;top:36%"></span><span style="left:44%;top:44%" class="me"></span><span style="left:26%;top:48%"></span><span style="left:70%;top:72%"></span><span style="left:86%;top:60%"></span></div>
+            <div class="bx-filters"><span class="on">⚡ Express</span><span>❄️ Frigo &amp; Médical</span><span>🌙 Nuit</span><span>🌍 International</span></div>
+          </div>
+          <div class="bx-txt"><span class="bx-num">01</span><div><h3>TransportFinder</h3><p>Tapez votre ville : toutes les sociétés de transport autour de vous, avec téléphone, adresse, site web et avis Google. Filtrez par type de transport.</p><span class="bx-go">Essayer TransportFinder →</span></div><span class="tool-tag tool-tag-starter bx-tag">Inclus dans tous les plans</span></div>
         </div>
-        <div class="tool-card" onclick="accessTool('charges')">
-          <div class="tool-icon tool-icon-green">📊</div>
-          <h3>Simulateur de Charges</h3>
-          <p>Calculez les charges salariales et patronales. CDI, CDD, intérim, alternance. France & Belgique.</p>
-          <span class="tool-tag tool-tag-pro">Plan Pro uniquement</span>
+        <div class="bx-card" onclick="accessTool('revenus')">
+          <div class="bx-vis bx-vis-rev">
+            <div class="bx-big"><small>Revenu net mensuel · exemple</small><span data-count="2981">2 981</span> €</div>
+            <div class="bx-bars"><i style="height:40%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:70%"></i><i style="height:62%"></i><i style="height:84%" class="on"></i></div>
+          </div>
+          <div class="bx-txt"><span class="bx-num">02</span><div><h3>Simulateur de revenus</h3><p>Votre tarif, vos livraisons, vos charges : voyez ce qu'il vous reste et votre seuil de rentabilité, en France et en Belgique.</p><span class="bx-go">Calculer mon revenu →</span></div><span class="tool-tag tool-tag-pro bx-tag">Inclus dans Pro &amp; Entreprise</span></div>
+        </div>
+        <div class="bx-card" onclick="accessTool('charges')">
+          <div class="bx-vis bx-vis-ch">
+            <div class="bx-rows"><div class="lbl"><span>Exemple · CDI France</span></div><div><span>Salaire brut</span><b>2 500 €</b></div><div><span>Salaire net</span><b>1 895 €</b></div><div><span>Charges patronales</span><b class="o">+ 1 008 €</b></div><div class="tot"><span>Coût total employeur</span><b>3 508 €</b></div></div>
+          </div>
+          <div class="bx-txt"><span class="bx-num">03</span><div><h3>Simulateur de charges</h3><p>Combien coûte vraiment un chauffeur salarié ? CDI, CDD, intérim, alternance, en France et en Belgique.</p><span class="bx-go">Simuler une embauche →</span></div><span class="tool-tag tool-tag-pro bx-tag">Inclus dans Pro &amp; Entreprise</span></div>
         </div>
       </div>
     </div>
@@ -688,9 +1094,8 @@ button,select,input{font-family:inherit;cursor:pointer}
           <div class="price-period">Pour les sociétés de transport</div>
           <div class="price-features">
             <div class="price-feat"><span class="price-feat-icon">✓</span>Profil mis en avant dans les résultats</div>
-            <div class="price-feat"><span class="price-feat-icon">✓</span>Badge ✅ "Vérifié" sur votre fiche</div>
             <div class="price-feat"><span class="price-feat-icon">✓</span>Statistiques de visibilité</div>
-            <div class="price-feat"><span class="price-feat-icon">✓</span>Contact illimité des chauffeurs</div>
+            <div class="price-feat"><span class="price-feat-icon">✓</span>Contact illimité des sociétés</div>
             <div class="price-feat"><span class="price-feat-icon">✓</span>Tout le plan Pro inclus</div>
             <div class="price-feat"><span class="price-feat-icon">✓</span>Support VIP dédié</div>
             <div class="price-feat"><span class="price-feat-icon">✓</span>Accès aux futures fonctionnalités</div>
@@ -2057,6 +2462,243 @@ window.addEventListener('load', function() {
   setTimeout(_checkAuthState, 500);
   setInterval(_checkAuthState, 5000); // Toutes les 5s — évite les appels Memberstack concurrents
 });
+
+// ══ ACCUEIL v2 : animations ══
+(function(){
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Titre : apparition mot par mot
+  const title = document.getElementById('hxTitle');
+  if (title && !reduce) {
+    let i = 0;
+    const wrap = node => {
+      [...node.childNodes].forEach(n => {
+        if (n.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(part => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            const s = document.createElement('span'); s.className = 'w'; s.textContent = part;
+            s.style.animationDelay = (0.15 + i++ * 0.07) + 's'; frag.appendChild(s);
+          });
+          n.replaceWith(frag);
+        } else if (n.nodeType === 1 && n.tagName !== 'BR') wrap(n);
+      });
+    };
+    wrap(title);
+  }
+
+  // Flux de cartes « exemples »
+  const EX = [
+    ['Recherche · exemple', 'Sociétés autour de Lyon, 25 km', '30'],
+    ['Transport express · exemple', '★ 4,6 · à 1,2 km · appel direct', '📞'],
+    ['Revenu net · exemple', 'Simulateur, livreur indépendant', '2 981 €'],
+    ['Filtre Frigo & Médical · exemple', 'Transport frigorifique et pharma', '❄️'],
+    ['Coût d\'un salarié · exemple', 'CDI France, 2 500 € brut', '3 508 €'],
+    ['Filtre International · exemple', 'Transporteurs vers l\'Europe', '🌍'],
+    ['Transport de nuit · exemple', 'Sociétés qui tournent 24h/24', '🌙']
+  ];
+  const feed = document.getElementById('hxFeed');
+  if (feed) {
+    const H = 72, SHOW = 3; let next = 0; const cards = [];
+    const make = d => {
+      const el = document.createElement('div'); el.className = 'hx-ex';
+      el.innerHTML = `<span class="hx-ok">✓</span><div><b>${d[0]}</b><small>${d[1]}</small></div><em>${d[2]}</em>`;
+      return el;
+    };
+    const layout = () => cards.forEach((c, k) => { c.style.transform = `translateY(${k * H}px)`; c.style.opacity = k < SHOW ? 1 : 0; });
+    for (; next < SHOW; next++) { const c = make(EX[next]); cards.push(c); feed.appendChild(c); }
+    layout();
+    if (!reduce) setInterval(() => {
+      if (document.hidden) return;
+      const c = make(EX[next++ % EX.length]);
+      c.style.transform = `translateY(-${H}px)`; c.style.opacity = 0;
+      feed.prepend(c); cards.unshift(c);
+      requestAnimationFrame(() => requestAnimationFrame(layout));
+      const old = cards.pop(); old.style.opacity = 0; old.style.transform = `translateY(${SHOW * H}px)`;
+      setTimeout(() => old.remove(), 800);
+    }, 2600);
+  }
+
+  // Téléphone : saisie, recherche, résultats, appel — en boucle
+  const vis = document.querySelector('.hx-visual');
+  if (vis && !reduce) {
+    vis.classList.add('hx-anim');
+    const city = document.getElementById('hxCity'), go = document.getElementById('hxGo'),
+          cnt = document.getElementById('hxCount'), row = document.getElementById('hxCountRow'),
+          pill = document.getElementById('hxPill'), res = [...vis.querySelectorAll('.hx-res')];
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    async function loop() {
+      while (true) {
+        res.forEach(r => r.classList.remove('show')); row.classList.remove('show'); pill.classList.remove('show');
+        city.textContent = '';
+        await wait(500);
+        for (const ch of 'Lyon') { city.textContent += ch; await wait(160); }
+        await wait(350); go.classList.add('press'); await wait(180); go.classList.remove('press');
+        await wait(350); row.classList.add('show');
+        for (let n = 0; n <= 30; n++) { cnt.textContent = n; await wait(22); }
+        for (const r of res) { r.classList.add('show'); await wait(220); }
+        pill.classList.add('show');
+        await wait(600);
+        const call = res[0].querySelector('.hx-call'); call.classList.add('ring-on');
+        await wait(2200); call.classList.remove('ring-on');
+        await wait(2200);
+      }
+    }
+    loop();
+  }
+
+  // Outils : apparition au défilement + compteur + filtres qui défilent
+  const cards = document.querySelectorAll('.bx-card');
+  const countUp = el => {
+    const target = +el.dataset.count, t0 = performance.now(), d = 1400;
+    const step = now => { const p = Math.min(1, (now - t0) / d); const v = Math.round(target * (1 - Math.pow(1 - p, 3)));
+      el.textContent = v.toLocaleString('fr-BE'); if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  };
+  if ('IntersectionObserver' in window && !reduce) {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('in');
+      e.target.querySelectorAll('[data-count]').forEach(countUp);
+      io.unobserve(e.target);
+    }), { threshold: 0.2 });
+    cards.forEach(c => io.observe(c));
+  } else cards.forEach(c => c.classList.add('in'));
+  const chips = document.querySelectorAll('.bx-filters span');
+  if (chips.length && !reduce) { let k = 0; setInterval(() => { chips.forEach(c => c.classList.remove('on')); chips[k++ % chips.length].classList.add('on'); }, 1400); }
+})();
+
+// ══ DÉMO PRODUIT ══
+(function(){
+  const root = document.getElementById('demo'); if (!root) return;
+  const body = root.querySelector('.dm-body'), cur = document.getElementById('dmCursor');
+  const tabs = [...root.querySelectorAll('.dm-tab')], panes = [...root.querySelectorAll('.dm-pane')];
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Sociétés fictives (exemple)
+  const CO = [
+    ['Rhône Fret Express', 'Lyon 7e', '4.6', 128, '1,2'], ['Saône Logistique', 'Villeurbanne', '4.2', 57, '2,8'],
+    ['Confluence Messagerie', 'Lyon 2e', '4.8', 213, '3,4'], ['Monts d\'Or Transports', 'Vénissieux', '4.4', 88, '5,6'],
+    ['Presqu\'île Coursiers', 'Lyon 4e', '4.1', 19, '6,3'], ['Fourvière Frigo Services', 'Écully', '4.7', 64, '7,9']
+  ];
+  const FRIGO = [5, 2, 0];
+  let gen = 0, cur_tab = 0, visible = false;
+  const wait = (ms, g) => new Promise((res, rej) => setTimeout(() => g === gen ? res() : rej('stop'), ms));
+  const $ = id => document.getElementById(id);
+  function moveTo(el, g, dx = .5, dy = .5) {
+    const b = body.getBoundingClientRect(), r = el.getBoundingClientRect();
+    cur.style.left = (r.left - b.left + r.width * dx) + 'px'; cur.style.top = (r.top - b.top + r.height * dy) + 'px';
+    return wait(750, g);
+  }
+  async function click(el, g) {
+    cur.classList.add('click');
+    const b = body.getBoundingClientRect(), c = cur.getBoundingClientRect();
+    const rp = document.createElement('span'); rp.className = 'dm-ripple';
+    rp.style.left = (c.left - b.left + 4) + 'px'; rp.style.top = (c.top - b.top + 4) + 'px'; body.appendChild(rp);
+    setTimeout(() => rp.remove(), 700);
+    if (el) el.classList.add('press');
+    await wait(160, g); cur.classList.remove('click'); if (el) el.classList.remove('press');
+  }
+  async function type(el, text, g, speed = 110) { el.textContent = ''; for (const ch of text) { el.textContent += ch; await wait(speed, g); } }
+  function card(c) {
+    const d = document.createElement('div'); d.className = 'dm-card';
+    d.innerHTML = `<div class="dm-ch"><span class="dm-av">🏢</span><span class="dm-op">● Ouvert</span></div><b>${c[0]}</b><small>📍 ${c[1]} · exemple</small>
+      <div class="dm-cm"><span class="st">★ ${c[2]} <span style="color:#777">(${c[3]})</span></span><span class="km">${c[4]} km</span></div>
+      <div class="dm-ca"><span>📞 Appeler</span><span>Détails →</span></div>`;
+    return d;
+  }
+  // 01 — TransportFinder
+  async function finder(g) {
+    const city = $('dmCity'), ph = $('dmPh'), grid = $('dmGrid'), cnt = $('dmCount'), load = $('dmLoad'), modal = $('dmModal');
+    const chips = [...$('dmChips').children];
+    city.textContent = ''; ph.style.display = ''; grid.innerHTML = ''; cnt.innerHTML = ''; modal.classList.remove('on');
+    chips.forEach((c, i) => c.classList.toggle('on', i === 0));
+    await moveTo(city.parentElement, g, .25, .55); await click(null, g);
+    ph.style.display = 'none'; await type(city, 'Lyon', g, 170);
+    await wait(300, g);
+    await moveTo($('dmGo'), g); await click($('dmGo'), g);
+    load.classList.add('on'); await wait(1100, g); load.classList.remove('on');
+    for (let n = 0; n <= 30; n += 2) { cnt.innerHTML = `<b>${n}</b> sociétés trouvées <small>près de Lyon · rayon 25 km</small>`; await wait(28, g); }
+    cnt.innerHTML = `<b>30</b> sociétés trouvées <small>près de Lyon · rayon 25 km</small>`;
+    const cards = CO.map(c => { const d = card(c); grid.appendChild(d); return d; });
+    for (const d of cards) { await wait(170, g); d.classList.add('show'); }
+    await wait(1300, g);
+    await moveTo(chips[2], g); await click(null, g);
+    chips.forEach(c => c.classList.remove('on')); chips[2].classList.add('on');
+    cards.forEach(d => d.classList.remove('show')); await wait(350, g);
+    grid.innerHTML = ''; cnt.innerHTML = `<b>9</b> sociétés · ❄️ Frigo &amp; Médical <small>exemple</small>`;
+    const fc = FRIGO.map(i => { const d = card(CO[i]); grid.appendChild(d); return d; });
+    for (const d of fc) { await wait(170, g); d.classList.add('show'); }
+    await wait(900, g);
+    await moveTo(fc[0], g, .4, .35); fc[0].classList.add('hl'); await click(null, g);
+    $('dmMName').textContent = CO[FRIGO[0]][0]; $('dmMAddr').textContent = CO[FRIGO[0]][1] + ' · exemple';
+    $('dmMRate').textContent = '★★★★★ ' + CO[FRIGO[0]][2] + '/5 · ' + CO[FRIGO[0]][3] + ' avis';
+    modal.classList.add('on'); await wait(800, g);
+    await moveTo($('dmCall'), g); await click($('dmCall'), g); $('dmCall').classList.add('pulse');
+    await wait(2600, g); $('dmCall').classList.remove('pulse');
+  }
+  // 02 / 03 — Simulateurs
+  async function fillForm(pane, g) {
+    const ins = [...pane.querySelectorAll('.dm-in')];
+    ins.forEach(i => { i.querySelector('b').textContent = ''; i.classList.remove('act'); });
+    for (const i of ins) {
+      if (getComputedStyle(i.parentElement).display === 'none') { i.querySelector('b').textContent = i.querySelector('b').dataset.v; continue; }
+      await moveTo(i, g, .3, .5); await click(null, g); i.classList.add('act');
+      await type(i.querySelector('b'), i.querySelector('b').dataset.v, g, 120); await wait(150, g); i.classList.remove('act');
+    }
+  }
+  async function countTo(el, target, g, ms = 1200) {
+    const t0 = performance.now();
+    while (true) { const p = Math.min(1, (performance.now() - t0) / ms); el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString('fr-BE'); if (p >= 1) break; await wait(30, g); }
+  }
+  async function revenus(g) {
+    const pane = panes[1], rows = [...pane.querySelectorAll('.dm-wf>div')];
+    $('dmNet').textContent = '0'; rows.forEach(r => r.classList.remove('show')); $('dmSeuil').style.width = '0'; $('dmSeuilTxt').style.opacity = 0;
+    await fillForm(pane, g);
+    for (const r of rows) { r.classList.add('show'); await wait(160, g); }
+    await countTo($('dmNet'), 2981, g);
+    $('dmSeuil').style.width = '100%'; $('dmSeuilTxt').textContent = '✓ Rentable — seuil : 103 livraisons par mois'; $('dmSeuilTxt').style.opacity = 1;
+    await wait(3200, g);
+  }
+  async function charges(g) {
+    const pane = panes[2], rows = [...pane.querySelectorAll('.dm-wf>div')], seg = [...$('dmSeg').children];
+    $('dmCost').textContent = '0'; rows.forEach(r => r.classList.remove('show')); $('dmSplit').classList.remove('on'); seg.forEach(s => s.classList.remove('on'));
+    await moveTo(seg[0], g); await click(null, g); seg[0].classList.add('on'); await wait(300, g);
+    await fillForm(pane, g);
+    $('dmSplit').classList.add('on');
+    for (const r of rows) { r.classList.add('show'); await wait(160, g); }
+    await countTo($('dmCost'), 3508, g);
+    await wait(3400, g);
+  }
+  const RUN = [finder, revenus, charges];
+  function show(i) {
+    cur_tab = i;
+    tabs.forEach((t, k) => { t.classList.toggle('on', k === i); const bar = t.querySelector('i'); bar.style.transition = 'none'; bar.style.width = '0'; });
+    panes.forEach((p, k) => p.classList.toggle('on', k === i));
+  }
+  async function play(i) {
+    const g = ++gen; show(i);
+    const bar = tabs[i].querySelector('i'); const est = [17000, 10500, 10000][i];
+    requestAnimationFrame(() => { bar.style.transition = `width ${est}ms linear`; bar.style.width = '100%'; });
+    try { await wait(400, g); await RUN[i](g); if (g === gen) play((i + 1) % 3); } catch (e) { /* interrompu */ }
+  }
+  tabs.forEach((t, i) => t.addEventListener('click', () => play(i)));
+  if (reduce) {
+    // version statique : résultats affichés directement
+    const grid = $('dmGrid'); CO.forEach(c => { const d = card(c); d.classList.add('show'); grid.appendChild(d); });
+    $('dmCity').textContent = 'Lyon'; $('dmPh').style.display = 'none';
+    $('dmCount').innerHTML = '<b>30</b> sociétés trouvées <small>près de Lyon · rayon 25 km</small>';
+    root.querySelectorAll('.dm-wf>div').forEach(r => r.classList.add('show'));
+    root.querySelectorAll('.dm-in b').forEach(b => b.textContent = b.dataset.v);
+    $('dmNet').textContent = '2 981'; $('dmCost').textContent = '3 508'; $('dmSplit').classList.add('on'); $('dmSeg').children[0].classList.add('on');
+    cur.style.display = 'none';
+    return;
+  }
+  // Démarre quand la démo devient visible
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => { if (es[0].isIntersecting && !visible) { visible = true; play(0); io.disconnect(); } }, { threshold: 0.25 });
+    io.observe(root.querySelector('.dm-win'));
+  } else play(0);
+})();
 </script>
 </body>
 </html>
