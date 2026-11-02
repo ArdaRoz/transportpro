@@ -827,23 +827,6 @@ button,select,input{font-family:inherit;cursor:pointer}
     <button class="nav-burger" id="navBurger"><span></span><span></span><span></span></button>
   </div>
 </nav>
-<!-- COUNTER BANNER -->
-<div class="counter-banner" id="counterBanner">
-  <div class="counter-inner">
-    <div class="counter-item">
-      <div class="counter-dot"></div>
-      <strong id="ctr-transporteurs">1 247</strong> transporteurs trouvés ce mois
-    </div>
-    <div class="counter-sep"></div>
-    <div class="counter-item">
-      <div class="counter-dot"></div>
-      <strong id="ctr-membres">89</strong> membres actifs
-    </div>
-
-  </div>
-</div>
-
-
 <!-- LANDING -->
 <div id="page-landing" class="page active">
 
@@ -1570,7 +1553,7 @@ let isSearching = false; // Prevent concurrent requests
 let planCheckReady = false; // Becomes true once checkUserPlan() finishes
 
 // Abonnement encore valable ? (un abonnement annulé, expiré ou impayé ne donne plus accès)
-const INACTIVE_PLAN_STATUSES = ['CANCELED', 'CANCELLED', 'ENDED', 'EXPIRED', 'INACTIVE', 'UNPAID', 'INCOMPLETE_EXPIRED'];
+const INACTIVE_PLAN_STATUSES = ['CANCELED', 'CANCELLED', 'ENDED', 'EXPIRED', 'INACTIVE', 'UNPAID', 'INCOMPLETE_EXPIRED', 'REQUIRES_PAYMENT'];
 function isPlanActive(p) {
   return !!p && !INACTIVE_PLAN_STATUSES.includes(String(p.status || '').toUpperCase());
 }
@@ -1917,6 +1900,50 @@ function closeNavMenu(){const l=document.querySelector('.nav-links');if(l&&windo
 document.querySelectorAll('.nav-link,.nav-cta,.nav-login').forEach(el=>el.addEventListener('click',closeNavMenu));
 
 // ══ TRANSPORT FINDER ══════════════════
+// Sécurité affichage : les textes venant de Google (nom, adresse, site…) sont "échappés"
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function safeUrl(u){u=String(u||'');return /^https?:\/\//i.test(u)?u:'';}
+function telOf(p){return String(p||'').replace(/[^0-9+]/g,'');}
+// Le serveur (/api/places) vérifie la connexion et l'abonnement : on lui envoie le token Memberstack du membre
+function tfToken(){
+  try{const t=window.$memberstackDom&&window.$memberstackDom.getMemberCookie&&window.$memberstackDom.getMemberCookie();if(t)return t;}catch(e){}
+  try{const t=localStorage.getItem('_ms-mid');if(t)return t;}catch(e){}
+  const m=document.cookie.match(/(?:^|;\s*)_ms-mid=([^;]+)/);return m?decodeURIComponent(m[1]):'';
+}
+function tfNewSearchId(){return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);}
+function tfApi(url,opts={},sid){
+  const headers={...(opts.headers||{})};
+  const t=tfToken();if(t)headers['Authorization']='Bearer '+t;
+  if(sid)headers['X-TF-Search']=sid;
+  return fetch(url,{...opts,headers});
+}
+// Réponse "refusé" du serveur (pas connecté, pas d'abonnement, limite atteinte) → erreur spéciale
+async function tfCheckRefusal(r){
+  if(!r||(r.status!==401&&r.status!==403&&r.status!==429))return;
+  let d={};try{d=await r.json();}catch(e){}
+  const err=new Error(d.message||'Recherche refusée');err.refusal={status:r.status,code:d.error||''};throw err;
+}
+function tfShowRefusal(err){
+  if(err.refusal.code==='LIMIT'&&!userHasPro){
+    searchCount=Math.max(searchCount,3);
+    try{localStorage.setItem('tf_count_'+TODAY,searchCount);}catch(e){}
+    document.getElementById('limitBanner').style.display='flex';
+  }
+  showToast('⚠ '+err.message,true);
+  document.getElementById('tfCards').innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">🔒</div><h3>Recherche impossible</h3><p>${esc(err.message)}</p></div>`;
+}
+// Photos : chargées avec le token (une balise <img> ne peut pas l'envoyer), seulement quand elles deviennent visibles
+const tfPhotoCache=new Map();
+async function tfFetchPhoto(img){
+  const name=img.getAttribute('data-photo');img.removeAttribute('data-photo');
+  try{
+    let u=tfPhotoCache.get(name);
+    if(!u){const r=await tfApi(tfPhotoUrl(name));if(!r.ok)throw new Error('photo');u=URL.createObjectURL(await r.blob());tfPhotoCache.set(name,u);}
+    img.src=u;
+  }catch(e){img.dispatchEvent(new Event('error'));}
+}
+const tfPhotoObserver=('IntersectionObserver' in window)?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){tfPhotoObserver.unobserve(e.target);tfFetchPhoto(e.target);}}),{rootMargin:'200px'}):null;
+function tfLoadPhotos(root){root.querySelectorAll('img[data-photo]').forEach(img=>{if(tfPhotoObserver)tfPhotoObserver.observe(img);else tfFetchPhoto(img);});}
 let tfResults = [], tfLat = null, tfLng = null, tfLabel = '';
 function km(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180;const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2;return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))*10)/10;}
 
@@ -1930,6 +1957,7 @@ async function tfSearch() {
   const sanitizedCity = city.replace(/[<>"'&;]/g, '').trim().slice(0, 100);
   if (!sanitizedCity && tfLat === null) { showToast('⚠ Ville invalide', true); return; }
   isSearching = true;
+  const sid = tfNewSearchId();
   const searchBtn = document.getElementById('tfSearchBtn');
   if (searchBtn) { searchBtn.disabled = true; searchBtn.textContent = '⏳ Recherche...'; }
   
@@ -1939,7 +1967,8 @@ async function tfSearch() {
   res.scrollIntoView({ behavior:'smooth', block:'start' });
   try {
     if (city) {
-      const r = await fetch(`/api/places?endpoint=geocode&address=${encodeURIComponent(sanitizedCity)}&language=fr`);
+      const r = await tfApi(`/api/places?endpoint=geocode&address=${encodeURIComponent(sanitizedCity)}&language=fr`);
+      await tfCheckRefusal(r);
       const d = await r.json();
       if (d.status !== 'OK') throw new Error(`Ville "${city}" introuvable`);
       tfLat = d.results[0].geometry.location.lat;
@@ -1950,15 +1979,16 @@ async function tfSearch() {
     const seen = new Map();
     for (const q of queries) {
       try {
-        const r = await fetch('/api/places', {
+        const r = await tfApi('/api/places', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify({endpoint:'searchText',textQuery:q,locationBias:{circle:{center:{latitude:tfLat,longitude:tfLng},radius}},languageCode:'fr',maxResultCount:20})
-        });
+        }, sid);
+        await tfCheckRefusal(r);
         const d = await r.json();
         if (d.error) console.warn('Places API error:', d.error);
         (d.places||[]).forEach(p=>{if(!seen.has(p.id))seen.set(p.id,p);});
-      } catch(e){ console.warn('Query failed:', e.message); }
+      } catch(e){ if (e.refusal) throw e; console.warn('Query failed:', e.message); }
     }
     tfResults = Array.from(seen.values()).map(p=>({
       id:p.id,name:p.displayName?.text||'Nom inconnu',address:p.formattedAddress||'Adresse non disponible',
@@ -1976,7 +2006,8 @@ async function tfSearch() {
     tfRenderCards();
   } catch(err) {
     console.error('tfSearch error:', err);
-    document.getElementById('tfCards').innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">⚠️</div><h3>Erreur de recherche</h3><p>${err.message}</p><p style="font-size:.75rem;color:rgba(255,255,255,.3);margin-top:8px">Réessayez ou contactez le support</p></div>`;
+    if (err.refusal) { tfShowRefusal(err); return; }
+    document.getElementById('tfCards').innerHTML=`<div class="tf-empty"><div class="tf-empty-icon">⚠️</div><h3>Erreur de recherche</h3><p>${esc(err.message)}</p><p style="font-size:.75rem;color:rgba(255,255,255,.3);margin-top:8px">Réessayez ou contactez le support</p></div>`;
   } finally {
     isSearching = false;
     const searchBtn = document.getElementById('tfSearchBtn');
@@ -2165,6 +2196,7 @@ async function tfSearchWithFilter() {
   // Un filtre relance une vraie recherche Google : même limite que tfSearch (3/jour en Starter)
   if (!(await canSearch())) { tfRenderCards(); return; }
   isSearching = true;
+  const sid = tfNewSearchId();
   const radius = parseInt(document.getElementById('tfRadius').value);
   const queries = filterQueries[activeFilter] || filterQueries[''];
   
@@ -2176,7 +2208,7 @@ async function tfSearchWithFilter() {
     const seen = new Map();
     for (const q of queries) {
       try {
-        const r = await fetch('/api/places', {
+        const r = await tfApi('/api/places', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -2188,11 +2220,12 @@ async function tfSearchWithFilter() {
             languageCode: 'fr',
             maxResultCount: 20
           })
-        });
+        }, sid);
+        await tfCheckRefusal(r);
         const d = await r.json();
         if (d.error) console.warn('Places API error:', d.error);
         (d.places || []).forEach(p => { if (!seen.has(p.id)) seen.set(p.id, p); });
-      } catch(e) { console.warn('Query failed:', e.message); }
+      } catch(e) { if (e.refusal) throw e; console.warn('Query failed:', e.message); }
     }
 
     tfResults = Array.from(seen.values()).map(p => ({
@@ -2219,7 +2252,8 @@ async function tfSearchWithFilter() {
       : `près de ${tfLabel} · rayon ${radius / 1000} km · ${3-searchCount} recherche${3-searchCount>1?'s':''} restante${3-searchCount>1?'s':''}`;
     tfRenderCards();
   } catch(err) {
-    document.getElementById('tfCards').innerHTML = `<div class="tf-empty"><div class="tf-empty-icon">⚠️</div><h3>Erreur</h3><p>${err.message}</p></div>`;
+    if (err.refusal) { tfShowRefusal(err); return; }
+    document.getElementById('tfCards').innerHTML = `<div class="tf-empty"><div class="tf-empty-icon">⚠️</div><h3>Erreur</h3><p>${esc(err.message)}</p></div>`;
   } finally {
     isSearching = false;
   }
@@ -2252,39 +2286,41 @@ function tfRenderCards(){
   grid.innerHTML=results.map((c,i)=>{
     const stars=c.rating?`<span class="tf-stars">${'★'.repeat(Math.floor(c.rating))}${'☆'.repeat(5-Math.floor(c.rating))}</span><span class="tf-rating">${c.rating.toFixed(1)}</span><span class="tf-rcount">(${c.reviews})</span>`:'<span style="font-size:.75rem;color:rgba(255,255,255,.25)">Pas noté</span>';
     const photo=tfPhotoUrl(c.photo);
-    const img=photo?`<img src="${photo}" loading="lazy" onerror="this.parentElement.innerHTML='🏢'"/>`:'🏢';
+    const img=photo?`<img data-photo="${esc(c.photo)}" alt="" onerror="this.parentElement.innerHTML='🏢'"/>`:'🏢';
     const badge=c.open===true?'<span class="tf-badge tf-badge-open">● Ouvert</span>':c.open===false?'<span class="tf-badge tf-badge-closed">● Fermé</span>':'';
     return `<div class="tf-card" style="animation-delay:${i*55}ms" onclick="tfOpenModal(${tfResults.indexOf(c)})">
       <div class="tf-card-head"><div class="tf-avatar">${img}</div><div>${badge}</div></div>
-      <div class="tf-name">${c.name}</div>
-      <div class="tf-addr">📍 ${c.address}</div>
+      <div class="tf-name">${esc(c.name)}</div>
+      <div class="tf-addr">📍 ${esc(c.address)}</div>
       <div class="tf-stats"><div>${stars}</div><span class="tf-dist">${c.distance} km</span></div>
       <div class="tf-actions">
-        ${c.phone?`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();window.location.href='tel:${c.phone.replace(/\s/g,'')}'">📞 Appeler</button>`:`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();tfOpenModal(${tfResults.indexOf(c)})">📞 Contacter</button>`}
+        ${c.phone?`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();window.location.href='tel:${telOf(c.phone)}'">📞 Appeler</button>`:`<button class="tf-btn tf-btn-call" onclick="event.stopPropagation();tfOpenModal(${tfResults.indexOf(c)})">📞 Contacter</button>`}
         <button class="tf-btn tf-btn-detail" onclick="event.stopPropagation();tfOpenModal(${tfResults.indexOf(c)})">Détails →</button>
       </div>
     </div>`;
   }).join('');
+  tfLoadPhotos(grid);
 }
 
 function tfOpenModal(idx){
   const c=tfResults[idx];if(!c)return;
   const hours=c.open===true?'<span style="color:#34d399">Ouvert maintenant</span>':c.open===false?'<span style="color:#f87171">Fermé maintenant</span>':'<span style="color:rgba(255,255,255,.3)">Non renseigné</span>';
   const photo=tfPhotoUrl(c.photo);
-  document.getElementById('modalHeader').innerHTML=`${photo?`<img src="${photo}" style="width:100%;height:160px;object-fit:cover;border-radius:var(--r-xl) var(--r-xl) 0 0;display:block" onerror="this.remove()"/>`:''}
-  <div style="padding:${photo?'16':'24'}px 24px 0"><div class="modal-tag">Société de transport</div><div class="modal-name">${c.name}</div></div>`;
+  document.getElementById('modalHeader').innerHTML=`${photo?`<img data-photo="${esc(c.photo)}" alt="" style="width:100%;height:160px;object-fit:cover;border-radius:var(--r-xl) var(--r-xl) 0 0;display:block" onerror="this.remove()"/>`:''}
+  <div style="padding:${photo?'16':'24'}px 24px 0"><div class="modal-tag">Société de transport</div><div class="modal-name">${esc(c.name)}</div></div>`;
+  tfLoadPhotos(document.getElementById('modalHeader'));
   document.getElementById('modalBody').innerHTML=`<div>
-    <div class="modal-info-row"><span class="modal-info-icon">📍</span><div class="modal-info-content"><span class="modal-info-label">Adresse</span><span class="modal-info-val">${c.address}</span></div></div>
-    <div class="modal-info-row"><span class="modal-info-icon">📞</span><div class="modal-info-content"><span class="modal-info-label">Téléphone</span>${c.phone?`<a class="modal-info-val modal-info-link" href="tel:${c.phone.replace(/\s/g,'')}">${c.phone}</a>`:'<span class="modal-info-val" style="color:rgba(255,255,255,.3)">Non renseigné</span>'}</div></div>
-    <div class="modal-info-row"><span class="modal-info-icon">🌐</span><div class="modal-info-content"><span class="modal-info-label">Site web</span>${c.website?`<a class="modal-info-val modal-info-link" href="${c.website}" target="_blank">${c.website.replace(/^https?:\/\//,'').slice(0,40)}</a>`:'<span class="modal-info-val" style="color:rgba(255,255,255,.3)">Non renseigné</span>'}</div></div>
+    <div class="modal-info-row"><span class="modal-info-icon">📍</span><div class="modal-info-content"><span class="modal-info-label">Adresse</span><span class="modal-info-val">${esc(c.address)}</span></div></div>
+    <div class="modal-info-row"><span class="modal-info-icon">📞</span><div class="modal-info-content"><span class="modal-info-label">Téléphone</span>${c.phone?`<a class="modal-info-val modal-info-link" href="tel:${telOf(c.phone)}">${esc(c.phone)}</a>`:'<span class="modal-info-val" style="color:rgba(255,255,255,.3)">Non renseigné</span>'}</div></div>
+    <div class="modal-info-row"><span class="modal-info-icon">🌐</span><div class="modal-info-content"><span class="modal-info-label">Site web</span>${safeUrl(c.website)?`<a class="modal-info-val modal-info-link" href="${esc(safeUrl(c.website))}" target="_blank" rel="noopener">${esc(c.website.replace(/^https?:\/\//,'').slice(0,40))}</a>`:'<span class="modal-info-val" style="color:rgba(255,255,255,.3)">Non renseigné</span>'}</div></div>
     ${c.rating?`<div class="modal-info-row"><span class="modal-info-icon">⭐</span><div class="modal-info-content"><span class="modal-info-label">Note Google</span><span class="modal-info-val" style="color:var(--amber)">${'★'.repeat(Math.floor(c.rating))} ${c.rating}/5 · ${c.reviews} avis</span></div></div>`:''}
     <div class="modal-info-row"><span class="modal-info-icon">🕐</span><div class="modal-info-content"><span class="modal-info-label">Statut</span><div>${hours}</div></div></div>
     <div class="modal-info-row"><span class="modal-info-icon">◎</span><div class="modal-info-content"><span class="modal-info-label">Distance</span><span class="modal-info-val" style="color:#5b8aff">${c.distance} km</span></div></div>
   </div>`;
   let btns='';
-  if(c.phone)btns+=`<button class="mbtn mbtn-call" onclick="window.location.href='tel:${c.phone.replace(/\s/g,'')}'">📞 Appeler</button>`;
-  if(c.website)btns+=`<button class="mbtn mbtn-web" onclick="window.open('${c.website}','_blank')">🌐 Site web</button>`;
-  if(c.gmaps)btns+=`<button class="mbtn mbtn-gmaps" onclick="window.open('${c.gmaps}','_blank')">🗺 Maps</button>`;
+  if(c.phone)btns+=`<button class="mbtn mbtn-call" onclick="window.location.href='tel:${telOf(c.phone)}'">📞 Appeler</button>`;
+  if(safeUrl(c.website))btns+=`<button class="mbtn mbtn-web" data-url="${esc(safeUrl(c.website))}" onclick="window.open(this.dataset.url,'_blank','noopener')">🌐 Site web</button>`;
+  if(safeUrl(c.gmaps))btns+=`<button class="mbtn mbtn-gmaps" data-url="${esc(safeUrl(c.gmaps))}" onclick="window.open(this.dataset.url,'_blank','noopener')">🗺 Maps</button>`;
   btns+=`<button class="mbtn mbtn-close" onclick="closeModal()">Fermer</button>`;
   document.getElementById('modalFooter').innerHTML=btns;
   document.getElementById('modalOverlay').classList.add('open');
@@ -2311,7 +2347,9 @@ function rozSetCountry(c){
   document.getElementById('roz-tab-be').className='roz-tab roz-tab-be'+(c==='be'?' active':'');
   document.getElementById('roz-tab-fr').className='roz-tab roz-tab-fr'+(c==='fr'?' active':'');
   if(c==='be'){document.getElementById('roz-infobox').innerHTML='<span class="roz-flag">BE</span> <strong>Belgique :</strong> Cotisations ~20,5% sur le bénéfice net.';document.getElementById('roz-cotTaux').value='20.5';document.getElementById('roz-cotMin').value='121.14';document.getElementById('roz-cot-label').textContent='Taux cotisations (% bénéfice net)';document.getElementById('roz-cot2-label').textContent='Cotisation minimale / trimestre';document.getElementById('roz-cot-hint').textContent='Taux standard ~20,5%';document.getElementById('roz-cot2-hint').textContent='Appliquée si bénéfice faible';}
-  else{document.getElementById('roz-infobox').innerHTML='<span class="roz-flag">FR</span> <strong>France :</strong> Cotisations ~22% sur le CA brut. Abattement forfaitaire 71%.';document.getElementById('roz-cotTaux').value='22';document.getElementById('roz-cotMin').value='71';document.getElementById('roz-cot-label').textContent='Taux cotisations (% CA brut)';document.getElementById('roz-cot2-label').textContent='Abattement forfaitaire (%)';document.getElementById('roz-cot-hint').textContent='Taux micro-entrepreneur ~22%';document.getElementById('roz-cot2-hint').textContent='Abattement transport 71%';}
+  else{document.getElementById('roz-infobox').innerHTML='<span class="roz-flag">FR</span> <strong>France :</strong> Cotisations ~22% sur le CA brut (micro-entreprise).';document.getElementById('roz-cotTaux').value='22';document.getElementById('roz-cotMin').value='71';document.getElementById('roz-cot-label').textContent='Taux cotisations (% CA brut)';document.getElementById('roz-cot2-label').textContent='Abattement forfaitaire (%)';document.getElementById('roz-cot-hint').textContent='Taux micro-entrepreneur ~22%';document.getElementById('roz-cot2-hint').textContent='Abattement transport 71%';}
+  // La 2e case (cotisation minimale) ne sert qu'en Belgique : cachée en France
+  const cot2=document.getElementById('roz-cotMin').closest('.roz-field');if(cot2)cot2.style.display=c==='be'?'':'none';
   rozCalc();
 }
 function rozCalc(){
@@ -2319,7 +2357,7 @@ function rozCalc(){
   const ch=(parseFloat(document.getElementById('roz-carb').value)||0)+(parseFloat(document.getElementById('roz-assur').value)||0)+(parseFloat(document.getElementById('roz-entret').value)||0)+(parseFloat(document.getElementById('roz-leasing').value)||0)+(parseFloat(document.getElementById('roz-autres').value)||0);
   const ct=parseFloat(document.getElementById('roz-cotTaux').value)||0,cm=parseFloat(document.getElementById('roz-cotMin').value)||0;
   const ca=t*l*j;let bn,cotis,rn;
-  if(rozCountry==='be'){bn=ca-ch;cotis=Math.max(bn>0?bn*(ct/100):0,cm*3);rn=bn-cotis;}else{bn=ca-ch;cotis=ca*(ct/100);rn=bn-cotis;}
+  if(rozCountry==='be'){bn=ca-ch;cotis=Math.max(bn>0?bn*(ct/100):0,cm/3);rn=bn-cotis;}else{bn=ca-ch;cotis=ca*(ct/100);rn=bn-cotis;}
   const nj=j>0?rn/j:0,na=rn*12;
   document.getElementById('roz-net-big').textContent=rozFmt(rn);document.getElementById('roz-ca-brut').textContent=rozFmt(ca);document.getElementById('roz-tot-charges').textContent=rozFmt(ch);document.getElementById('roz-benef-net').textContent=rozFmt(bn);document.getElementById('roz-cotis').textContent=rozFmt(cotis);document.getElementById('roz-net-jour').textContent=rozFmt(nj);document.getElementById('roz-net-an').textContent=rozFmt(na);
   document.getElementById('roz-wf1').textContent=rozFmt(ca);document.getElementById('roz-wf2').textContent='− '+rozFmt(ch);document.getElementById('roz-wf3').textContent=rozFmt(bn);document.getElementById('roz-wf4').textContent='− '+rozFmt(cotis);document.getElementById('roz-wf5').textContent=rozFmt(rn);
@@ -2340,7 +2378,7 @@ function salPct(n){return(n*100).toFixed(2)+'%';}
 function salSetCountry(c){salCountry=c;document.getElementById('sal-btn-fr').className='sal-tab sal-tab-fr'+(c==='fr'?' active':'');document.getElementById('sal-btn-be').className='sal-tab sal-tab-be'+(c==='be'?' active':'');document.getElementById('sal-infobox').className='sal-infobox sal-info-'+c;salCompute();}
 function salCompute(){
   const c=salCountry,contrat=document.getElementById('sal-contrat').value;
-  const brut=parseFloat(document.getElementById('sal-brut').value)||2500,temps=parseFloat(document.getElementById('sal-temps').value);
+  const brutVal=parseFloat(document.getElementById('sal-brut').value),brut=isNaN(brutVal)?2500:brutVal,temps=parseFloat(document.getElementById('sal-temps').value);
   const base=brut*temps,d=salData[c],primePre=(d.primePre[contrat]||0)*base,ifm=(d.ifm[contrat]||0)*base;
   const baseCalc=(c==='fr'&&contrat==='interim')?base+ifm:base;
   const salRows=d.sal[contrat]||d.sal.cdi,patRows=d.pat[contrat]||d.pat.cdi;
@@ -2367,40 +2405,7 @@ function showToast(msg,err=false){const t=document.getElementById('toast');t.tex
 if(!userHasPro && searchCount>=3)document.getElementById('limitBanner').style.display='flex';
 
 
-// ══ COMPTEUR DYNAMIQUE ════════════════════
-function initCounter() {
-  // Base values - realistic starting numbers
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const daysElapsed = Math.floor((now - startOfMonth) / (1000 * 60 * 60 * 24));
-  const hoursElapsed = Math.floor((now - startOfMonth) / (1000 * 60 * 60));
 
-  // Dynamic values based on time elapsed this month
-  const transporteurs = 1247 + (daysElapsed * 18) + Math.floor(hoursElapsed * 0.3);
-  const membres = 89 + Math.floor(daysElapsed * 1.2);
-
-
-  // Format numbers
-  function fmt(n) {
-    return n.toLocaleString('fr-BE');
-  }
-
-  document.getElementById('ctr-transporteurs').textContent = fmt(transporteurs);
-  document.getElementById('ctr-membres').textContent = fmt(membres);
-
-
-  // Show banner on landing page
-  const banner = document.getElementById('counterBanner');
-  if (banner) banner.style.display = 'block';
-
-  // Animate numbers slightly every 30 seconds
-  setInterval(() => {
-    const t = parseInt(document.getElementById('ctr-transporteurs').textContent.replace(/\s/g, '')) + Math.floor(Math.random() * 3);
-    document.getElementById('ctr-transporteurs').textContent = fmt(t);
-  }, 30000);
-}
-
-window.addEventListener('load', initCounter);
 // ══ AUTO RELOAD ON LOGIN/LOGOUT ══════
 let _msState = 'unknown';
 
