@@ -3,14 +3,25 @@
 // recherche de sociétés (exactement comme le TransportFinder) et renvoie le résultat.
 // La clé Google reste côté serveur (variable Vercel GOOGLE_API_KEY), jamais renvoyée.
 
+// Anti-spam (ajouté le 01/11/2026) : le résultat est gardé 5 minutes, pour que quelqu'un qui
+// rafraîchit cette page en boucle ne fasse pas monter la facture Google.
+let lastResult = null, lastTime = 0;
+const CACHE_MS = 5 * 60 * 1000;
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Access-Control-Allow-Origin', '*');
+
+  if (lastResult && Date.now() - lastTime < CACHE_MS) {
+    return res.status(lastResult.ok ? 200 : 500).json({ ...lastResult, cached: true });
+  }
 
   const KEY = process.env.GOOGLE_API_KEY;
   const out = {
     time: new Date().toISOString(),
     googleKeyConfigured: !!KEY,
+    // true = les recherches sont protégées (connexion + abonnement + 3/jour Starter vérifiés sur le serveur)
+    protection: !!process.env.MEMBERSTACK_SECRET_KEY,
     geocode: null,
     search: null,
     ok: false,
@@ -66,5 +77,6 @@ export default async function handler(req, res) {
   }
 
   out.ok = out.geocode?.status === 'OK' && (out.search?.count || 0) > 0;
+  lastResult = out; lastTime = Date.now();
   return res.status(out.ok ? 200 : 500).json(out);
 }
